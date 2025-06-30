@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyCoin Wallet</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-coins"></i>
+                    <h1>MyCoin Wallet</h1>
+                </div>
+                <div class="network-status">
+                    <span class="status-indicator" id="networkStatus"></span>
+                    <span id="networkText">Connecting...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar">
+                <ul class="nav-menu">
+                    <li class="nav-item active" data-tab="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </li>
+                    <li class="nav-item" data-tab="wallet">
+                        <i class="fas fa-wallet"></i>
+                        <span>Wallet</span>
+                    </li>
+                    <li class="nav-item" data-tab="send">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Send</span>
+                    </li>
+                    <li class="nav-item" data-tab="receive">
+                        <i class="fas fa-qrcode"></i>
+                        <span>Receive</span>
+                    </li>
+                    <li class="nav-item" data-tab="history">
+                        <i class="fas fa-history"></i>
+                        <span>History</span>
+                    </li>
+                    <li class="nav-item" data-tab="mining">
+                        <i class="fas fa-pickaxe"></i>
+                        <span>Mining</span>
+                    </li>
+                    <li class="nav-item" data-tab="network">
+                        <i class="fas fa-network-wired"></i>
+                        <span>Network</span>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Dashboard Tab -->
+                <div class="tab-content active" id="dashboard">
+                    <div class="dashboard-header">
+                        <h2>Dashboard</h2>
+                        <div class="balance-card">
+                            <div class="balance-info">
+                                <span class="balance-label">Total Balance</span>
+                                <span class="balance-amount" id="totalBalance">0.00 MYC</span>
+                            </div>
+                            <div class="balance-actions">
+                                <button class="btn btn-primary" onclick="showTab('send')">
+                                    <i class="fas fa-paper-plane"></i> Send
+                                </button>
+                                <button class="btn btn-secondary" onclick="showTab('receive')">
+                                    <i class="fas fa-qrcode"></i> Receive
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-cube"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="totalBlocks">0</span>
+                                <span class="stat-label">Total Blocks</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-exchange-alt"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="totalTransactions">0</span>
+                                <span class="stat-label">Total Transactions</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="connectedPeers">0</span>
+                                <span class="stat-label">Connected Peers</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="recent-transactions">
+                        <h3>Recent Transactions</h3>
+                        <div class="transaction-list" id="recentTransactionsList">
+                            <div class="no-transactions">
+                                <i class="fas fa-inbox"></i>
+                                <p>No transactions yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wallet Tab -->
+                <div class="tab-content" id="wallet">
+                    <div class="wallet-header">
+                        <h2>Wallet Management</h2>
+                    </div>
+                    
+                    <div class="wallet-actions">
+                        <div class="action-card">
+                            <div class="action-icon">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            <div class="action-content">
+                                <h3>Create New Wallet</h3>
+                                <p>Generate a new wallet with a secure private key</p>
+                                <button class="btn btn-primary" onclick="createNewWallet()">
+                                    Create Wallet
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="action-card">
+                            <div class="action-icon">
+                                <i class="fas fa-folder-open"></i>
+                            </div>
+                            <div class="action-content">
+                                <h3>Load Existing Wallet</h3>
+                                <p>Import wallet using private key or mnemonic phrase</p>
+                                <button class="btn btn-secondary" onclick="showLoadWalletModal()">
+                                    Load Wallet
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="current-wallet" id="currentWalletInfo">
+                        <h3>Current Wallet</h3>
+                        <div class="wallet-info">
+                            <div class="info-row">
+                                <span class="info-label">Address:</span>
+                                <span class="info-value" id="walletAddress">-</span>
+                                <button type="button" class="btn-copy" onclick="copyToClipboard('walletAddress')" title="Copy wallet address" aria-label="Copy wallet address">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Public Key:</span>
+                                <span class="info-value" id="walletPublicKey">-</span>
+                                <button type="button" class="btn-copy" onclick="copyToClipboard('walletPublicKey')" title="Copy public key" aria-label="Copy public key">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Balance:</span>
+                                <span class="info-value" id="walletBalance">0.00 MYC</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Send Tab -->
+                <div class="tab-content" id="send">
+                    <div class="send-header">
+                        <h2>Send MyCoin</h2>
+                    </div>
+                    
+                    <form class="send-form" id="sendForm">
+                        <div class="form-group">
+                            <label for="recipientAddress">Recipient Address</label>
+                            <input type="text" id="recipientAddress" placeholder="Enter recipient address" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="sendAmount">Amount (MYC)</label>
+                            <input type="number" id="sendAmount" step="0.01" min="0.01" placeholder="0.00" required>
+                            <div class="available-balance">
+                                Available: <span id="availableBalance">0.00 MYC</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="transactionFee">Transaction Fee (MYC)</label>
+                            <input type="number" id="transactionFee" step="0.01" min="0.01" value="1.00" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="senderPrivateKey">Private Key (for signing)</label>
+                            <input type="password" id="senderPrivateKey" placeholder="Enter your private key" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-large">
+                            <i class="fas fa-paper-plane"></i>
+                            Send Transaction
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Receive Tab -->
+                <div class="tab-content" id="receive">
+                    <div class="receive-header">
+                        <h2>Receive MyCoin</h2>
+                    </div>
+
+                    <div class="receive-content">
+                        <div class="qr-section">
+                            <div class="qr-placeholder">
+                                <i class="fas fa-qrcode"></i>
+                                <p>QR Code will be displayed here</p>
+                            </div>
+                        </div>
+
+                        <div class="address-section">
+                            <div class="form-group">
+                                <label for="receiveAddress">Your Wallet Address</label>
+                                <div class="address-display">
+                                    <input type="text" id="receiveAddress" readonly aria-label="Your wallet address for receiving MyCoin" title="Your wallet address for receiving MyCoin">
+                                    <button type="button" class="btn btn-secondary" onclick="copyToClipboard('receiveAddress')" title="Copy address to clipboard" aria-label="Copy address to clipboard">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="receive-instructions">
+                                <h3>How to receive MyCoin:</h3>
+                                <ol>
+                                    <li>Share your wallet address with the sender</li>
+                                    <li>Or let them scan the QR code</li>
+                                    <li>Wait for the transaction to be confirmed</li>
+                                    <li>Check your balance and transaction history</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Tab -->
+                <div class="tab-content" id="history">
+                    <div class="history-header">
+                        <h2>Transaction History</h2>
+                        <button class="btn btn-secondary" onclick="loadTransactionHistory()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+
+                    <div class="transaction-history">
+                        <div class="transaction-list" id="transactionHistoryList">
+                            <div class="no-transactions">
+                                <i class="fas fa-inbox"></i>
+                                <p>No transactions yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mining Tab -->
+                <div class="tab-content" id="mining">
+                    <div class="mining-header">
+                        <h2>Mining</h2>
+                    </div>
+
+                    <div class="mining-content">
+                        <div class="mining-stats">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-cube"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-value" id="miningDifficulty">4</span>
+                                    <span class="stat-label">Current Difficulty</span>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-coins"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-value" id="miningReward">50</span>
+                                    <span class="stat-label">Block Reward (MYC)</span>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-value" id="pendingTxCount">0</span>
+                                    <span class="stat-label">Pending Transactions</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mining-actions">
+                            <div class="action-card">
+                                <div class="action-icon">
+                                    <i class="fas fa-pickaxe"></i>
+                                </div>
+                                <div class="action-content">
+                                    <h3>Mine New Block</h3>
+                                    <p>Process pending transactions and earn mining rewards</p>
+                                    <button class="btn btn-primary" onclick="showMineBlockModal()">
+                                        <i class="fas fa-play"></i> Start Mining
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mining-info">
+                            <h3>About Mining</h3>
+                            <p>Mining is the process of adding new blocks to the blockchain. When you mine a block, you:</p>
+                            <ul>
+                                <li>Process all pending transactions</li>
+                                <li>Solve a cryptographic puzzle (Proof of Work)</li>
+                                <li>Add the new block to the blockchain</li>
+                                <li>Receive mining rewards in MyCoin</li>
+                            </ul>
+                            <p><strong>Note:</strong> Mining difficulty adjusts based on network conditions.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Tab -->
+                <div class="tab-content" id="network">
+                    <div class="network-header">
+                        <h2>Network</h2>
+                        <button class="btn btn-primary" onclick="showConnectPeerModal()">
+                            <i class="fas fa-plus"></i> Add Peer
+                        </button>
+                    </div>
+
+                    <div class="network-content">
+                        <div class="network-stats">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-value" id="networkPeerCount">0</span>
+                                    <span class="stat-label">Connected Peers</span>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-server"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-value">6001</span>
+                                    <span class="stat-label">P2P Port</span>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-globe"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-value">3001</span>
+                                    <span class="stat-label">API Port</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="peers-section">
+                            <h3>Connected Peers</h3>
+                            <div class="peers-list" id="peersList">
+                                <div class="no-peers">
+                                    <i class="fas fa-network-wired"></i>
+                                    <p>No peers connected</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="network-info">
+                            <h3>Network Information</h3>
+                            <p>MyCoin uses a peer-to-peer network to synchronize the blockchain across all nodes.</p>
+                            <ul>
+                                <li>Connect to other MyCoin nodes to join the network</li>
+                                <li>Share transactions and blocks with connected peers</li>
+                                <li>Help maintain the decentralized network</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="loadWalletModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Load Wallet</h3>
+                <button type="button" class="modal-close" onclick="closeModal('loadWalletModal')" title="Close modal" aria-label="Close load wallet modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="switchLoadMethod('privateKey')">Private Key</button>
+                    <button class="tab-btn" onclick="switchLoadMethod('mnemonic')">Mnemonic</button>
+                </div>
+                
+                <div class="load-method active" id="privateKeyMethod">
+                    <div class="form-group">
+                        <label for="loadPrivateKey">Private Key</label>
+                        <input type="password" id="loadPrivateKey" placeholder="Enter your private key">
+                    </div>
+                </div>
+                
+                <div class="load-method" id="mnemonicMethod">
+                    <div class="form-group">
+                        <label for="loadMnemonic">Mnemonic Phrase</label>
+                        <textarea id="loadMnemonic" placeholder="Enter your 12-word mnemonic phrase"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('loadWalletModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="loadWallet()">Load Wallet</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

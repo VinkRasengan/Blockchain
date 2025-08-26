@@ -1,14 +1,21 @@
-import * as express from 'express';
-import * as cors from 'cors';
+const express = require('express');
+import { Request, Response, Application } from 'express';
+import cors from 'cors';
 import { Blockchain } from './Blockchain';
 import { P2PNetwork } from './P2PNetwork';
 import { Wallet } from './Wallet';
 import { Transaction } from './Transaction';
 
+// Utility function to get error message
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return getErrorMessage(error);
+  return String(error);
+}
+
 export class MyCoinNode {
   private blockchain: Blockchain;
   private p2pNetwork: P2PNetwork;
-  private httpServer: express.Application;
+  private httpServer: Application;
   private httpPort: number;
   private p2pPort: number;
   private wallet: Wallet | null = null;
@@ -27,15 +34,16 @@ export class MyCoinNode {
    * Thiết lập HTTP server cho API
    */
   private setupHttpServer(): void {
-    this.httpServer.use(cors());
-    this.httpServer.use(express.json());
+    const app = this.httpServer;
+    app.use(cors());
+    app.use(express.json());
 
     // API endpoints
-    this.httpServer.get('/blocks', (req, res) => {
+    app.get('/blocks', (req: Request, res: Response) => {
       res.json(this.blockchain.chain);
     });
 
-    this.httpServer.get('/block/:hash', (req, res) => {
+    app.get('/block/:hash', (req: Request, res: Response) => {
       const block = this.blockchain.getBlockByHash(req.params.hash);
       if (block) {
         res.json(block);
@@ -80,7 +88,7 @@ export class MyCoinNode {
           res.status(400).json({ error: 'Invalid transaction' });
         }
       } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ error: getErrorMessage(error) });
       }
     });
 
@@ -96,7 +104,7 @@ export class MyCoinNode {
         this.p2pNetwork.broadcastNewBlock(newBlock);
         res.json({ success: true, block: newBlock });
       } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: getErrorMessage(error) });
       }
     });
 
@@ -127,7 +135,7 @@ export class MyCoinNode {
         this.p2pNetwork.connectToPeer(peerUrl);
         res.json({ success: true, message: `Connecting to ${peerUrl}` });
       } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ error: getErrorMessage(error) });
       }
     });
 
@@ -143,7 +151,7 @@ export class MyCoinNode {
           mnemonic: mnemonic
         });
       } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: getErrorMessage(error) });
       }
     });
 
@@ -163,7 +171,7 @@ export class MyCoinNode {
         this.wallet = wallet;
         res.json(wallet.getInfo());
       } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ error: getErrorMessage(error) });
       }
     });
 
@@ -188,7 +196,7 @@ export class MyCoinNode {
           res.status(400).json({ error: 'Transaction failed' });
         }
       } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ error: getErrorMessage(error) });
       }
     });
 

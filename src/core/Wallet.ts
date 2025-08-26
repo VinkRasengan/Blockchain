@@ -86,10 +86,16 @@ export class Wallet {
    * Mã hóa private key với passphrase
    */
   encryptPrivateKey(passphrase: string): string {
-    const cipher = crypto.createCipher('aes-256-cbc', passphrase);
+    const algorithm = 'aes-256-cbc';
+    const key = crypto.scryptSync(passphrase, 'salt', 32);
+    const iv = crypto.randomBytes(16);
+
+    const cipher = crypto.createCipheriv(algorithm, key, iv);
     let encrypted = cipher.update(this.privateKey, 'hex', 'hex');
     encrypted += cipher.final('hex');
-    return encrypted;
+
+    // Prepend IV to encrypted data
+    return iv.toString('hex') + ':' + encrypted;
   }
 
   /**
@@ -97,8 +103,24 @@ export class Wallet {
    */
   static decryptPrivateKey(encryptedPrivateKey: string, passphrase: string): string {
     try {
-      const decipher = crypto.createDecipher('aes-256-cbc', passphrase);
-      let decrypted = decipher.update(encryptedPrivateKey, 'hex', 'hex');
+      const algorithm = 'aes-256-cbc';
+      const key = crypto.scryptSync(passphrase, 'salt', 32);
+
+      // Extract IV and encrypted data
+      const parts = encryptedPrivateKey.split(':');
+      if (parts.length !== 2) {
+        // Fallback for old format (without IV)
+        const decipher = crypto.createDecipher('aes-256-cbc', passphrase);
+        let decrypted = decipher.update(encryptedPrivateKey, 'hex', 'hex');
+        decrypted += decipher.final('hex');
+        return decrypted;
+      }
+
+      const iv = Buffer.from(parts[0], 'hex');
+      const encryptedData = parts[1];
+
+      const decipher = crypto.createDecipheriv(algorithm, key, iv);
+      let decrypted = decipher.update(encryptedData, 'hex', 'hex');
       decrypted += decipher.final('hex');
       return decrypted;
     } catch (error) {

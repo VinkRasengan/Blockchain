@@ -1,7 +1,8 @@
-import * as WebSocket from 'ws';
+import WebSocket, { WebSocketServer } from 'ws';
 import { Block } from './Block';
 import { Transaction } from './Transaction';
 import { Blockchain } from './Blockchain';
+import { IncomingMessage } from 'http';
 
 export enum MessageType {
   QUERY_LATEST = 'QUERY_LATEST',
@@ -22,11 +23,14 @@ export interface Peer {
   socket: WebSocket;
   url: string;
   connected: boolean;
+  readyState?: number;
+  lastSeen?: number;
+  connectionTime?: number;
 }
 
 export class P2PNetwork {
   private peers: Peer[] = [];
-  private server: WebSocket.Server | null = null;
+  private server: WebSocketServer | null = null;
   private blockchain: Blockchain;
   private port: number;
 
@@ -39,9 +43,9 @@ export class P2PNetwork {
    * Khởi động P2P server
    */
   startServer(): void {
-    this.server = new WebSocket.Server({ port: this.port });
+    this.server = new WebSocketServer({ port: this.port });
     
-    this.server.on('connection', (socket: WebSocket, request) => {
+    this.server.on('connection', (socket: WebSocket, request: IncomingMessage) => {
       const url = `ws://${request.socket.remoteAddress}:${request.socket.remotePort}`;
       console.log(`New peer connected: ${url}`);
       
@@ -79,7 +83,9 @@ export class P2PNetwork {
     const peer: Peer = {
       socket,
       url,
-      connected: true
+      connected: true,
+      readyState: socket.readyState,
+      connectionTime: Date.now()
     };
 
     this.peers.push(peer);
@@ -87,6 +93,8 @@ export class P2PNetwork {
     socket.on('message', (data: string) => {
       try {
         const message: Message = JSON.parse(data);
+        peer.lastSeen = Date.now();
+        peer.readyState = socket.readyState;
         this.handleMessage(peer, message);
       } catch (error) {
         console.log(`Invalid message from ${url}: ${error}`);
@@ -96,12 +104,14 @@ export class P2PNetwork {
     socket.on('close', () => {
       console.log(`Peer disconnected: ${url}`);
       peer.connected = false;
+      peer.readyState = socket.readyState;
       this.peers = this.peers.filter(p => p !== peer);
     });
 
     socket.on('error', (error) => {
       console.log(`Peer error ${url}: ${error}`);
       peer.connected = false;
+      peer.readyState = socket.readyState;
     });
   }
 
@@ -282,7 +292,7 @@ export class P2PNetwork {
   /**
    * Broadcast message đến tất cả peers
    */
-  private broadcast(message: Message): void {
+  broadcast(message: Message): void {
     this.peers.forEach(peer => {
       this.sendMessage(peer, message);
     });
@@ -342,7 +352,32 @@ export class P2PNetwork {
    * Lấy danh sách peers
    */
   getPeers(): Peer[] {
-    return this.peers.filter(peer => peer.connected);
+    return this.peers;
+  }
+
+  /**
+   * Lấy node ID
+   */
+  getNodeId(): string {
+    return `node-${this.port}-${Date.now()}`;
+  }
+
+  /**
+   * Ngắt kết nối với peer
+   */
+  disconnectPeer(peerUrl: string): boolean {
+    const peerIndex = this.peers.findIndex(peer => peer.url === peerUrl);
+
+    if (peerIndex !== -1) {
+      const peer = this.peers[peerIndex];
+      if (peer.socket.readyState === WebSocket.OPEN) {
+        peer.socket.close();
+      }
+      peer.connected = false;
+      return true;
+    }
+
+    return false;
   }
 
   /**

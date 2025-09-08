@@ -357,6 +357,65 @@ export function transactionRoutes(node: MyCoinNode): Router {
     }
   });
 
+  /**
+   * Lấy danh sách giao dịch mới nhất
+   * GET /api/transactions/latest
+   */
+  router.get('/latest', (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 15;
+      const blockchain = node.getBlockchain();
+      
+      const allTransactions: any[] = [];
+
+      // Get from pending transactions first
+      blockchain.pendingTransactions.forEach(tx => {
+        allTransactions.push({
+          hash: tx.hash,
+          timestamp: tx.timestamp,
+          inputs: tx.inputs,
+          outputs: tx.outputs,
+          fee: tx.fee,
+          status: 'pending',
+          confirmations: 0,
+          blockIndex: null
+        });
+      });
+
+      // Then get from confirmed blocks (reverse order for latest first)
+      for (let i = blockchain.chain.length - 1; i >= 0 && allTransactions.length < limit; i--) {
+        const block = blockchain.chain[i];
+        for (const tx of block.transactions) {
+          if (allTransactions.length < limit) {
+            allTransactions.push({
+              hash: tx.hash,
+              timestamp: tx.timestamp,
+              inputs: tx.inputs,
+              outputs: tx.outputs,
+              fee: tx.fee,
+              status: 'confirmed',
+              confirmations: blockchain.chain.length - block.index,
+              blockIndex: block.index
+            });
+          }
+        }
+      }
+
+      res.json({
+        success: true,
+        transactions: allTransactions.slice(0, limit)
+      });
+
+    } catch (error) {
+      console.error('Error getting latest transactions:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get latest transactions',
+        message: getErrorMessage(error)
+      });
+    }
+  });
+
   return router;
 }
 

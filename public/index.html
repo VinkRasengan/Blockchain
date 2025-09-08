@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyCoin Wallet - Create & Access Your Wallet</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-coins"></i>
+                <h1>MyCoin</h1>
+            </div>
+            <nav class="nav">
+                <a href="#" class="nav-link">Wallet</a>
+                <a href="#" class="nav-link" onclick="showExplorer()">Explorer</a>
+                <a href="#" class="nav-link" onclick="showNetworkStats()">Network</a>
+                <button class="btn btn-outline" onclick="switchLanguage()">EN</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Welcome Section -->
+        <section class="welcome-section" id="welcomeSection">
+            <div class="container">
+                <div class="hero">
+                    <h2>Create a New Wallet or Access Your Wallet</h2>
+                    <p>MyCoin is a decentralized cryptocurrency wallet that gives you full control over your digital assets.</p>
+                </div>
+
+                <div class="wallet-options">
+                    <div class="option-card" onclick="showCreateWallet()">
+                        <div class="icon">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <h3>Create New Wallet</h3>
+                        <p>Generate a new wallet with private key and mnemonic phrase</p>
+                    </div>
+
+                    <div class="option-card" onclick="showAccessWallet()">
+                        <div class="icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <h3>Access My Wallet</h3>
+                        <p>Access your existing wallet using private key or keystore file</p>
+                    </div>
+
+                    <div class="option-card" onclick="showImportWallet()">
+                        <div class="icon">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <h3>Import Wallet</h3>
+                        <p>Import wallet from mnemonic phrase or private key</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Create Wallet Section -->
+        <section class="wallet-section hidden" id="createWalletSection">
+            <div class="container">
+                <div class="wallet-form">
+                    <div class="form-header">
+                        <button class="back-btn" onclick="showWelcome()">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <h2>Create New Wallet</h2>
+                    </div>
+
+                    <div class="steps">
+                        <div class="step active" id="step1">
+                            <h3>Step 1: Set Password</h3>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input type="password" id="password" placeholder="Enter a strong password">
+                                <div class="password-strength" id="passwordStrength"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <input type="password" id="confirmPassword" placeholder="Confirm your password">
+                            </div>
+                            <button class="btn btn-primary" onclick="generateWallet()">Generate Wallet</button>
+                        </div>
+
+                        <div class="step hidden" id="step2">
+                            <h3>Step 2: Save Your Private Key</h3>
+                            <div class="warning-box">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Save your private key in a safe place. You'll need it to access your wallet.</p>
+                            </div>
+                            <div class="key-display">
+                                <label>Private Key</label>
+                                <div class="key-value" id="privateKeyDisplay"></div>
+                                <button class="copy-btn" onclick="copyPrivateKey()">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                            </div>
+                            <div class="key-display">
+                                <label>Mnemonic Phrase</label>
+                                <div class="mnemonic-display" id="mnemonicDisplay"></div>
+                                <button class="copy-btn" onclick="copyMnemonic()">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                            </div>
+                            <!-- Removed checkbox requirement -->
+                            <button class="btn btn-primary" onclick="accessWallet()" id="accessWalletBtn">Access My Wallet</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Access Wallet Section -->
+        <section class="wallet-section hidden" id="accessWalletSection">
+            <div class="container">
+                <div class="wallet-form">
+                    <div class="form-header">
+                        <button class="back-btn" onclick="showWelcome()">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <h2>Access Your Wallet</h2>
+                    </div>
+
+                    <div class="access-methods">
+                        <div class="method-tabs">
+                            <button class="tab-btn active" onclick="showPrivateKeyTab()">Private Key</button>
+                            <button class="tab-btn" onclick="showKeystoreTab()">Keystore File</button>
+                            <button class="tab-btn" onclick="showMnemonicTab()">Mnemonic</button>
+                        </div>
+
+                        <div class="tab-content active" id="privateKeyTab">
+                            <div class="form-group">
+                                <label for="accessPrivateKey">Private Key</label>
+                                <input type="password" id="accessPrivateKey" placeholder="Enter your private key">
+                            </div>
+                            <button class="btn btn-primary" onclick="accessWalletWithPrivateKey()">Access Wallet</button>
+                        </div>
+
+                        <div class="tab-content hidden" id="keystoreTab">
+                            <div class="form-group">
+                                <label for="keystoreFile">Keystore File</label>
+                                <input type="file" id="keystoreFile" accept=".json">
+                            </div>
+                            <div class="form-group">
+                                <label for="keystorePassword">Password</label>
+                                <input type="password" id="keystorePassword" placeholder="Enter keystore password">
+                            </div>
+                            <button class="btn btn-primary" onclick="accessWalletWithKeystore()">Access Wallet</button>
+                        </div>
+
+                        <div class="tab-content hidden" id="mnemonicTab">
+                            <div class="form-group">
+                                <label for="mnemonicPhrase">Mnemonic Phrase</label>
+                                <textarea id="mnemonicPhrase" placeholder="Enter your 12-word mnemonic phrase"></textarea>
+                            </div>
+                            <button class="btn btn-primary" onclick="accessWalletWithMnemonic()">Access Wallet</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wallet Dashboard -->
+        <section class="wallet-dashboard hidden" id="walletDashboard">
+            <div class="container">
+                <div class="dashboard-header">
+                    <div class="wallet-info">
+                        <h2>My Wallet</h2>
+                        <div class="address-display">
+                            <label>Wallet Address:</label>
+                            <div class="address-value" id="walletAddress"></div>
+                            <button class="copy-btn small" onclick="copyAddress()">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="wallet-actions">
+                        <button class="btn btn-outline" onclick="showWelcome()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                        <button class="btn btn-outline" onclick="refreshWallet()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dashboard-content">
+                    <!-- Balance Card -->
+                    <div class="balance-card">
+                        <div class="balance-header">
+                            <h3>Account Balance</h3>
+                            <div class="balance-refresh" onclick="refreshBalance()">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                        </div>
+                        <div class="balance-amount">
+                            <span class="amount" id="walletBalance">0.000</span>
+                            <span class="currency">MYC</span>
+                        </div>
+                        <div class="balance-actions">
+                            <button class="btn btn-primary" onclick="showSendTransaction()">
+                                <i class="fas fa-paper-plane"></i> Send
+                            </button>
+                            <button class="btn btn-outline" onclick="showReceive()">
+                                <i class="fas fa-qrcode"></i> Receive
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-exchange-alt"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="transactionCount">0</div>
+                                <div class="stat-label">Transactions</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="lastActivity">-</div>
+                                <div class="stat-label">Last Activity</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-cubes"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="currentBlock">0</div>
+                                <div class="stat-label">Current Block</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction History -->
+                    <div class="transaction-history">
+                        <div class="history-header">
+                            <h3>Transaction History</h3>
+                            <div class="history-filters">
+                                <select id="transactionFilter" onchange="filterTransactions()">
+                                    <option value="all">All Transactions</option>
+                                    <option value="sent">Sent</option>
+                                    <option value="received">Received</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="transaction-list" id="transactionList">
+                            <div class="no-transactions">
+                                <i class="fas fa-inbox"></i>
+                                <p>No transactions found</p>
+                            </div>
+                        </div>
+                        <div class="pagination" id="transactionPagination">
+                            <!-- Pagination buttons will be added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Send Transaction Modal -->
+        <div class="modal hidden" id="sendTransactionModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Send MyCoin</h3>
+                    <button class="modal-close" onclick="closeSendModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="recipientAddress">Recipient Address</label>
+                        <input type="text" id="recipientAddress" placeholder="Enter recipient's wallet address">
+                    </div>
+                    <div class="form-group">
+                        <label for="sendAmount">Amount</label>
+                        <div class="amount-input">
+                            <input type="number" id="sendAmount" placeholder="0.000" step="0.001">
+                            <span class="currency-label">MYC</span>
+                        </div>
+                        <div class="balance-info">
+                            Available: <span id="availableBalance">0.000</span> MYC
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="transactionFee">Transaction Fee</label>
+                        <div class="fee-input">
+                            <input type="number" id="transactionFee" value="1" step="0.1">
+                            <span class="currency-label">MYC</span>
+                        </div>
+                    </div>
+                    <div class="transaction-summary">
+                        <div class="summary-row">
+                            <span>Amount:</span>
+                            <span id="summaryAmount">0.000 MYC</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Fee:</span>
+                            <span id="summaryFee">1.000 MYC</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total:</span>
+                            <span id="summaryTotal">1.000 MYC</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="closeSendModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="confirmSendTransaction()">Send Transaction</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Receive Modal -->
+        <div class="modal hidden" id="receiveModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Receive MyCoin</h3>
+                    <button class="modal-close" onclick="closeReceiveModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="receive-info">
+                        <p>Share your wallet address to receive MyCoin payments:</p>
+                        <div class="qr-code" id="qrCode"></div>
+                        <div class="address-share">
+                            <div class="address-text" id="shareAddress"></div>
+                            <button class="copy-btn" onclick="copyReceiveAddress()">
+                                <i class="fas fa-copy"></i> Copy Address
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block Explorer Section -->
+        <section class="explorer-section hidden" id="explorerSection">
+            <div class="container">
+                <div class="explorer-header">
+                    <button class="back-btn" onclick="showWalletDashboard()">
+                        <i class="fas fa-arrow-left"></i> Back to Wallet
+                    </button>
+                    <h2>MyCoin Block Explorer</h2>
+                </div>
+
+                <div class="search-section">
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="Search by transaction hash, block number, or address...">
+                        <button class="search-btn" onclick="performSearch()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="explorer-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Current Block</div>
+                        <div class="stat-value" id="explorerCurrentBlock">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Total Transactions</div>
+                        <div class="stat-value" id="explorerTotalTx">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Network Difficulty</div>
+                        <div class="stat-value" id="explorerDifficulty">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Pending Transactions</div>
+                        <div class="stat-value" id="explorerPendingTx">0</div>
+                    </div>
+                </div>
+
+                <div class="explorer-content">
+                    <div class="latest-blocks">
+                        <h3>Latest Blocks</h3>
+                        <div class="blocks-list" id="blocksList"></div>
+                    </div>
+                    
+                    <div class="latest-transactions">
+                        <h3>Latest Transactions</h3>
+                        <div class="transactions-list" id="explorerTransactionsList"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-sync-alt fa-spin"></i>
+            <p id="loadingText">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="/js/wallet.js"></script>
+    <script src="/js/explorer.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

@@ -83,8 +83,11 @@ export class Wallet {
   }
 
   /**
-   * Mã hóa private key với passphrase
+   * Lấy private key (sử dụng cẩn thận)
    */
+  getPrivateKey(): string {
+    return this.privateKey;
+  }
   encryptPrivateKey(passphrase: string): string {
     const algorithm = 'aes-256-cbc';
     const key = crypto.scryptSync(passphrase, 'salt', 32);

@@ -47,6 +47,7 @@ export function walletRoutes(node: MyCoinNode): Router {
         wallet: {
           address: wallet.address,
           publicKey: wallet.publicKey,
+          privateKey: wallet.getPrivateKey(), // Add private key to response
           mnemonic: mnemonic,
           qrCode: qrCodeDataUrl,
         },
@@ -62,6 +63,7 @@ export function walletRoutes(node: MyCoinNode): Router {
       if (password) {
         const encryptedPrivateKey = wallet.encryptPrivateKey(password);
         response.wallet.encryptedPrivateKey = encryptedPrivateKey;
+        // Keep both encrypted and unencrypted for display purposes
       }
 
       // Nếu yêu cầu lưu file
@@ -288,6 +290,89 @@ export function walletRoutes(node: MyCoinNode): Router {
       res.status(500).json({
         success: false,
         error: 'Failed to validate address',
+        message: getErrorMessage(error)
+      });
+    }
+  });
+
+  /**
+   * Generate mnemonic phrase
+   * GET /api/wallet/mnemonic
+   */
+  router.get('/mnemonic', (req: Request, res: Response) => {
+    try {
+      // Generate a simple mnemonic (in production, use BIP39)
+      const words = [
+        'abandon', 'ability', 'able', 'about', 'above', 'absent', 'absorb', 'abstract',
+        'absurd', 'abuse', 'access', 'accident', 'account', 'accuse', 'achieve', 'acid',
+        'acoustic', 'acquire', 'across', 'action', 'actor', 'actual', 'adapt', 'add',
+        'addict', 'address', 'adjust', 'admit', 'adult', 'advance', 'advice', 'aerobic',
+        'affair', 'afford', 'afraid', 'again', 'against', 'agency', 'agent', 'agree',
+        'ahead', 'aim', 'air', 'airport', 'aisle', 'alarm', 'album', 'alcohol',
+        'alert', 'alien', 'all', 'alley', 'allow', 'almost', 'alone', 'alpha',
+        'already', 'also', 'alter', 'always', 'amateur', 'amazing', 'among', 'amount'
+      ];
+
+      const mnemonic = Array.from({ length: 12 }, () => 
+        words[Math.floor(Math.random() * words.length)]
+      ).join(' ');
+
+      res.json({
+        success: true,
+        mnemonic: mnemonic
+      });
+
+    } catch (error) {
+      console.error('Error generating mnemonic:', error);
+      res.status(500).json({
+        success: false,
+        error: getErrorMessage(error)
+      });
+    }
+  });
+
+  /**
+   * Recover wallet from mnemonic
+   * POST /api/wallet/recover
+   */
+  router.post('/recover', async (req: Request, res: Response) => {
+    try {
+      const { mnemonic } = req.body;
+
+      if (!mnemonic) {
+        return res.status(400).json({
+          success: false,
+          error: 'Mnemonic phrase is required'
+        });
+      }
+
+      // Validate mnemonic format (12 words)
+      const words = mnemonic.trim().split(' ').filter((word: string) => word.length > 0);
+      if (words.length !== 12) {
+        return res.status(400).json({
+          success: false,
+          error: 'Mnemonic must contain exactly 12 words'
+        });
+      }
+
+      // Create wallet from mnemonic
+      const wallet = Wallet.fromMnemonic(mnemonic);
+      const balance = wallet.getBalance(node.getBlockchain());
+
+      res.json({
+        success: true,
+        address: wallet.address,
+        publicKey: wallet.publicKey,
+        privateKey: wallet.getPrivateKey(),
+        balance: balance,
+        message: 'Wallet recovered successfully'
+      });
+
+    } catch (error) {
+      console.error('Error recovering wallet:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to recover wallet from mnemonic',
         message: getErrorMessage(error)
       });
     }

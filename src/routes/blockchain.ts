@@ -271,5 +271,136 @@ export function blockchainRoutes(node: MyCoinNode): Router {
     }
   });
 
+  /**
+   * Lấy danh sách giao dịch mới nhất
+   * GET /api/blockchain/transactions/latest
+   */
+  router.get('/transactions/latest', (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const blockchain = node.getBlockchain();
+      
+      const allTransactions: any[] = [];
+
+      // Collect all transactions from blocks (reverse order for latest first)
+      for (let i = blockchain.chain.length - 1; i >= 0 && allTransactions.length < limit; i--) {
+        const block = blockchain.chain[i];
+        for (const tx of block.transactions) {
+          if (allTransactions.length < limit) {
+            allTransactions.push({
+              hash: tx.hash,
+              timestamp: tx.timestamp,
+              inputs: tx.inputs,
+              outputs: tx.outputs,
+              fee: tx.fee,
+              blockIndex: block.index,
+              confirmations: blockchain.chain.length - block.index
+            });
+          }
+        }
+      }
+
+      res.json({
+        success: true,
+        transactions: allTransactions.slice(0, limit)
+      });
+    } catch (error) {
+      console.error('Error getting latest transactions:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get latest transactions',
+        message: getErrorMessage(error)
+      });
+    }
+  });
+
+  /**
+   * Search trong blockchain
+   * GET /api/blockchain/search
+   */
+  router.get('/search', (req: Request, res: Response) => {
+    try {
+      const query = req.query.q as string;
+      
+      if (!query) {
+        return res.status(400).json({
+          success: false,
+          error: 'Search query is required'
+        });
+      }
+
+      const blockchain = node.getBlockchain();
+      const results: any[] = [];
+
+      // Search by block index
+      if (/^\d+$/.test(query)) {
+        const blockIndex = parseInt(query);
+        const block = blockchain.chain.find(b => b.index === blockIndex);
+        if (block) {
+          results.push({
+            type: 'block',
+            data: {
+              index: block.index,
+              hash: block.hash,
+              timestamp: block.timestamp,
+              transactions: block.transactions.length
+            }
+          });
+        }
+      }
+
+      // Search by hash (block or transaction)
+      if (query.length === 64) {
+        // Check for block hash
+        const block = blockchain.chain.find(b => b.hash === query);
+        if (block) {
+          results.push({
+            type: 'block',
+            data: block
+          });
+        }
+
+        // Check for transaction hash
+        const transaction = blockchain.getTransactionByHash(query);
+        if (transaction) {
+          results.push({
+            type: 'transaction',
+            data: transaction
+          });
+        }
+      }
+
+      // Search by address
+      if (query.length >= 26 && query.length <= 35) {
+        const balance = blockchain.getBalance(query);
+        const transactions = blockchain.getTransactionHistory(query);
+        
+        results.push({
+          type: 'address',
+          data: {
+            address: query,
+            balance: balance,
+            transactionCount: transactions.length,
+            transactions: transactions.slice(0, 10)
+          }
+        });
+      }
+
+      res.json({
+        success: true,
+        query: query,
+        results: results
+      });
+
+    } catch (error) {
+      console.error('Error searching blockchain:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Search failed',
+        message: getErrorMessage(error)
+      });
+    }
+  });
+
   return router;
 }

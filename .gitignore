@@ -107,8 +107,6 @@ coverage
 *.lcov
 
 # Electron-specific
-out/
-dist_electron/
 
 # IDE files
 .vscode/
@@ -127,10 +125,9 @@ ehthumbs.db
 Thumbs.db
 
 # Blockchain data
-data/
-blockchain/
-wallets/
-*.wallet
+# Keep repository data tracked by default (do not ignore `data/` or `data/wallets/`)
+# If you want to ignore wallets or other sensitive files, add explicit patterns like:
+# data/wallets/*.json
 
 # Test files
 test-results/

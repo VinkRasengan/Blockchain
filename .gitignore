@@ -127,6 +127,7 @@ ehthumbs.db
 Thumbs.db
 
 # Blockchain data
+data/
 blockchain/
 wallets/
 *.wallet

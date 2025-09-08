@@ -228,7 +228,7 @@ export function walletRoutes(node: MyCoinNode): Router {
       }
 
       const blockchain = node.getBlockchain();
-      const balance = blockchain.getBalanceOfAddress(address);
+      const balance = blockchain.getBalance(address);
       const utxos = blockchain.getUTXOsForAddress(address);
       
       // Tạo QR code
@@ -269,7 +269,7 @@ export function walletRoutes(node: MyCoinNode): Router {
         });
       }
 
-      const balance = node.getBlockchain().getBalanceOfAddress(address);
+      const balance = node.getBlockchain().getBalance(address);
 
       res.json({
         success: true,

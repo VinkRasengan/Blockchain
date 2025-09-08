@@ -130,6 +130,38 @@ export function transactionRoutes(node: MyCoinNode): Router {
   });
 
   /**
+   * Lấy danh sách pending transactions
+   * GET /api/transaction/pending
+   */
+  router.get('/pending', (req: Request, res: Response) => {
+    try {
+      const pendingTransactions = node.getBlockchain().pendingTransactions;
+
+      const formattedTransactions = pendingTransactions.map(tx => ({
+        hash: tx.hash,
+        inputs: tx.inputs,
+        outputs: tx.outputs,
+        fee: tx.fee,
+        timestamp: tx.timestamp,
+        status: 'pending'
+      }));
+
+      res.json({
+        success: true,
+        transactions: formattedTransactions,
+        count: formattedTransactions.length
+      });
+    } catch (error) {
+      console.error('Error getting pending transactions:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get pending transactions',
+        message: getErrorMessage(error)
+      });
+    }
+  });
+
+  /**
    * Lấy chi tiết giao dịch
    * GET /api/transaction/:hash
    */
@@ -233,17 +265,12 @@ export function transactionRoutes(node: MyCoinNode): Router {
 
       // Lấy từ pending transactions
       blockchain.pendingTransactions.forEach(tx => {
-        const isInvolved = tx.inputs.some(input => {
-          // Cần tìm UTXO để biết address của input
-          const utxo = blockchain.getUTXOsForAddress(address).find(u => 
-            u.txHash === input.txHash && u.outputIndex === input.outputIndex
-          );
-          return utxo !== undefined;
-        }) || tx.outputs.some(output => output.address === address);
+        // Kiểm tra xem transaction có liên quan đến address không
+        const hasOutputToAddress = tx.outputs.some(output => output.address === address);
 
-        if (isInvolved) {
-          const txType = tx.outputs.some(output => output.address === address) ? 'received' : 'sent';
-          
+        if (hasOutputToAddress) {
+          const txType = 'received';
+
           if (type === 'all' || type === txType) {
             transactions.push({
               hash: tx.hash,
@@ -266,24 +293,21 @@ export function transactionRoutes(node: MyCoinNode): Router {
         const block = blockchain.chain[i];
         
         block.transactions.forEach(tx => {
-          const isInvolved = tx.inputs.some(input => {
-            const utxo = blockchain.getUTXOsForAddress(address).find(u => 
-              u.txHash === input.txHash && u.outputIndex === input.outputIndex
-            );
-            return utxo !== undefined;
-          }) || tx.outputs.some(output => output.address === address);
+          // Kiểm tra xem transaction có output đến address không
+          const hasOutputToAddress = tx.outputs.some(output => output.address === address);
 
-          if (isInvolved) {
-            const txType = tx.outputs.some(output => output.address === address) ? 'received' : 'sent';
-            
+          if (hasOutputToAddress) {
+            const txType = 'received';
+            const amount = tx.outputs
+              .filter(output => output.address === address)
+              .reduce((sum, output) => sum + output.amount, 0);
+
             if (type === 'all' || type === txType) {
               const confirmations = blockchain.chain.length - i;
               transactions.push({
                 hash: tx.hash,
                 type: txType,
-                amount: tx.outputs
-                  .filter(output => output.address === address)
-                  .reduce((sum, output) => sum + output.amount, 0),
+                amount: amount,
                 fee: tx.fee,
                 timestamp: tx.timestamp,
                 status: 'confirmed',
@@ -325,37 +349,7 @@ export function transactionRoutes(node: MyCoinNode): Router {
     }
   });
 
-  /**
-   * Lấy danh sách pending transactions
-   * GET /api/transaction/pending
-   */
-  router.get('/pending', (req: Request, res: Response) => {
-    try {
-      const pendingTransactions = node.getBlockchain().pendingTransactions;
 
-      const formattedTransactions = pendingTransactions.map(tx => ({
-        hash: tx.hash,
-        inputs: tx.inputs,
-        outputs: tx.outputs,
-        fee: tx.fee,
-        timestamp: tx.timestamp,
-        status: 'pending'
-      }));
-
-      res.json({
-        success: true,
-        transactions: formattedTransactions,
-        count: formattedTransactions.length
-      });
-    } catch (error) {
-      console.error('Error getting pending transactions:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Failed to get pending transactions',
-        message: getErrorMessage(error)
-      });
-    }
-  });
 
   /**
    * Lấy danh sách giao dịch mới nhất

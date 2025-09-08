@@ -1,0 +1,18 @@
+{
+  "hash": "e1c87c5a936d7aeaba0ccebd6f6e2c3c7baa6290923101dd1b76b9014d2a6885",
+  "timestamp": 1757335270966,
+  "inputs": [
+    {
+      "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "outputIndex": -1
+    }
+  ],
+  "outputs": [
+    {
+      "address": "1DzUkREUbER7K14VmbkScm1bupu2bdJFnk",
+      "amount": 5
+    }
+  ],
+  "fee": 0,
+  "savedAt": 1757335270966
+}

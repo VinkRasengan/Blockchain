@@ -228,11 +228,17 @@
                         </div>
                     </div>
                     <div class="wallet-actions">
-                        <button class="btn btn-outline" onclick="showWelcome()">
-                            <i class="fas fa-sign-out-alt"></i> Logout
+                        <button class="btn btn-outline" onclick="showWalletManager()">
+                            <i class="fas fa-wallet"></i> Manage Wallets
+                        </button>
+                        <button class="btn btn-outline" onclick="exportWalletData()">
+                            <i class="fas fa-download"></i> Export
                         </button>
                         <button class="btn btn-outline" onclick="refreshWallet()">
                             <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <button class="btn btn-outline" onclick="showWelcome()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
                         </button>
                     </div>
                 </div>
@@ -291,6 +297,66 @@
                         </div>
                     </div>
 
+                    <!-- Mining Section -->
+                    <div class="mining-section">
+                        <div class="mining-header">
+                            <h3>Proof of Work Mining</h3>
+                            <div class="mining-toggle">
+                                <button class="btn btn-primary" id="miningToggle" onclick="toggleMining()">
+                                    <i class="fas fa-play"></i> Start Mining
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mining-controls">
+                            <div class="mining-control-group">
+                                <label for="minerAddress">Miner Address</label>
+                                <input type="text" id="minerAddress" readonly placeholder="Your wallet address">
+                            </div>
+                            <div class="mining-control-group">
+                                <label for="miningDifficulty">Current Difficulty</label>
+                                <input type="text" id="miningDifficulty" readonly placeholder="Loading...">
+                            </div>
+                            <div class="mining-control-group">
+                                <label for="pendingTxCount">Pending Transactions</label>
+                                <input type="text" id="pendingTxCount" readonly placeholder="0">
+                            </div>
+                            <div class="mining-control-group">
+                                <label for="miningReward">Mining Reward</label>
+                                <input type="text" id="miningReward" readonly placeholder="50 MYC">
+                            </div>
+                        </div>
+
+                        <div class="mining-stats">
+                            <div class="mining-stat-item">
+                                <div class="stat-label">Hash Rate</div>
+                                <div class="stat-value" id="hashRate">0 H/s</div>
+                            </div>
+                            <div class="mining-stat-item">
+                                <div class="stat-label">Blocks Mined</div>
+                                <div class="stat-value" id="blocksMined">0</div>
+                            </div>
+                            <div class="mining-stat-item">
+                                <div class="stat-label">Total Rewards</div>
+                                <div class="stat-value" id="totalRewards">0 MYC</div>
+                            </div>
+                            <div class="mining-stat-item">
+                                <div class="stat-label">Mining Status</div>
+                                <div class="stat-value" id="miningStatus">Stopped</div>
+                            </div>
+                        </div>
+
+                        <div class="mining-progress">
+                            <div class="mining-progress-bar">
+                                <div class="mining-progress-fill" id="miningProgress"></div>
+                            </div>
+                        </div>
+
+                        <div class="mining-log" id="miningLog">
+                            <div class="mining-log-entry info">Mining console ready. Click "Start Mining" to begin.</div>
+                        </div>
+                    </div>
+
                     <!-- Transaction History -->
                     <div class="transaction-history">
                         <div class="history-header">
@@ -316,6 +382,79 @@
                 </div>
             </div>
         </section>
+
+        <!-- Wallet Manager Modal -->
+        <div class="modal-overlay hidden" id="walletManagerModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Wallet Manager</h3>
+                    <button class="close-btn" onclick="closeModal('walletManagerModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="wallet-manager-tabs">
+                        <button class="tab-btn active" onclick="showWalletTab('saved')">
+                            <i class="fas fa-save"></i> Saved Wallets
+                        </button>
+                        <button class="tab-btn" onclick="showWalletTab('import')">
+                            <i class="fas fa-upload"></i> Import Data
+                        </button>
+                        <button class="tab-btn" onclick="showWalletTab('export')">
+                            <i class="fas fa-download"></i> Export Data
+                        </button>
+                    </div>
+
+                    <!-- Saved Wallets Tab -->
+                    <div class="wallet-tab-content" id="savedWalletsTab">
+                        <div class="saved-wallets-header">
+                            <h4>Your Saved Wallets</h4>
+                            <button class="btn btn-small btn-primary" onclick="refreshWalletHistory()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="saved-wallets-list" id="savedWalletsList">
+                            <!-- Wallet list will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Import Data Tab -->
+                    <div class="wallet-tab-content hidden" id="importDataTab">
+                        <div class="import-section">
+                            <h4>Import Wallet Data</h4>
+                            <p>Import previously exported wallet data including transaction history</p>
+                            <div class="file-upload-area" onclick="document.getElementById('importFile').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Click to select wallet data file (.json)</p>
+                                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleWalletImport(this)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Export Data Tab -->
+                    <div class="wallet-tab-content hidden" id="exportDataTab">
+                        <div class="export-section">
+                            <h4>Export Current Wallet</h4>
+                            <p>Export your current wallet and transaction history for backup</p>
+                            <div class="export-options">
+                                <div class="export-option">
+                                    <h5>Full Export</h5>
+                                    <p>Includes wallet keys and transaction history</p>
+                                    <button class="btn btn-primary" onclick="exportWalletData()">
+                                        <i class="fas fa-download"></i> Export Full Data
+                                    </button>
+                                </div>
+                                <div class="export-option">
+                                    <h5>Address Only</h5>
+                                    <p>Export only the wallet address (safe for sharing)</p>
+                                    <button class="btn btn-outline" onclick="exportAddressOnly()">
+                                        <i class="fas fa-share"></i> Export Address
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Send Transaction Modal -->
         <div class="modal hidden" id="sendTransactionModal">

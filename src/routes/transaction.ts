@@ -418,9 +418,9 @@ export function transactionRoutes(node: MyCoinNode): Router {
 
   /**
    * Lấy danh sách transactions của một address
-   * GET /api/transactions/:address
+   * GET /api/transaction/address/:address
    */
-  router.get('/:address', (req: Request, res: Response) => {
+  router.get('/address/:address', (req: Request, res: Response) => {
     try {
       const { address } = req.params;
       const { page = '1', limit = '10' } = req.query;

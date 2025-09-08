@@ -49,6 +49,15 @@ body {
     font-size: 2rem;
 }
 
+.logo .version {
+    font-size: 0.7rem;
+    background: #667eea;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
 .nav {
     display: flex;
     align-items: center;
@@ -65,6 +74,61 @@ body {
 
 .nav-link:hover {
     color: #667eea;
+}
+
+/* Navigation Dropdown */
+.nav-dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.nav-dropdown:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: #333;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+
+.dropdown-menu a:hover {
+    background: #f8f9fa;
+    color: #667eea;
+}
+
+.dropdown-menu a:first-child {
+    border-radius: 8px 8px 0 0;
+}
+
+.dropdown-menu a:last-child {
+    border-radius: 0 0 8px 8px;
 }
 
 /* Buttons */
@@ -173,6 +237,35 @@ body {
 .option-card p {
     color: #666;
     font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.option-card.featured {
+    border: 2px solid #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+}
+
+.card-features {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.feature {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: #f8f9fa;
+    color: #667eea;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.feature i {
+    font-size: 0.7rem;
 }
 
 /* Wallet Sections */
@@ -1535,6 +1628,133 @@ body {
     }
 }
 
+/* About Modal */
+.about-content {
+    text-align: center;
+}
+
+.about-logo {
+    margin-bottom: 2rem;
+}
+
+.about-logo i {
+    font-size: 4rem;
+    color: #667eea;
+    margin-bottom: 1rem;
+}
+
+.about-logo h2 {
+    color: #333;
+    margin: 0;
+}
+
+.about-content ul {
+    text-align: left;
+    margin: 1.5rem 0;
+    list-style: none;
+    padding: 0;
+}
+
+.about-content li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    color: #333;
+}
+
+.about-content li i {
+    color: #27ae60;
+    width: 16px;
+}
+
+.about-stats {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    text-align: left;
+}
+
+.about-stats .stat {
+    margin-bottom: 0.75rem;
+    color: #333;
+}
+
+.about-stats .stat:last-child {
+    margin-bottom: 0;
+}
+
+.about-links {
+    margin-top: 2rem;
+}
+
+/* Network Stats Modal */
+.network-stats-content .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.network-chart {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.network-chart h4 {
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.network-chart canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Explorer Header */
+.explorer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.explorer-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Dark Mode Support */
+.dark-mode {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: #ecf0f1;
+}
+
+.dark-mode .header {
+    background: rgba(44, 62, 80, 0.95);
+}
+
+.dark-mode .dropdown-menu {
+    background: #34495e;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .dropdown-menu a {
+    color: #ecf0f1;
+}
+
+.dark-mode .dropdown-menu a:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
     * {
@@ -1543,7 +1763,7 @@ body {
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
-    
+
     .loading-spinner i {
         animation: none;
     }

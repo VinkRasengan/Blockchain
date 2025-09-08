@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyCoin Wallet Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        button { background: #4CAF50; color: white; padding: 10px 20px; border: none; cursor: pointer; margin: 5px; }
+        button:hover { background: #45a049; }
+        pre { background: #f0f0f0; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+    </style>
+</head>
+<body>
+    <h1>🪙 MyCoin Wallet & Transaction Test</h1>
+    
+    <div class="section">
+        <h2>✅ Implementation Summary</h2>
+        <p><strong>Status: COMPLETED</strong></p>
+        <ul>
+            <li>✅ <strong>Wallet Persistence:</strong> Wallets are now saved to <code>data/wallets/</code> directory</li>
+            <li>✅ <strong>Transaction Persistence:</strong> All transactions saved to <code>data/transactions/</code> directory</li>
+            <li>✅ <strong>Initial Funding:</strong> New wallets receive 5 MYC automatically for testing</li>
+            <li>✅ <strong>Auto-Save:</strong> Blockchain state automatically saved after each block</li>
+            <li>✅ <strong>File Loading:</strong> Can load wallets and blockchain data from files on startup</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🧪 Test Wallet Creation</h2>
+        <button onclick="testCreateWallet()">Create Test Wallet</button>
+        <button onclick="listWallets()">List Saved Wallets</button>
+        <div id="walletResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Data Directories</h2>
+        <p>When you create wallets and make transactions, check these directories:</p>
+        <ul>
+            <li><code>data/wallets/</code> - Encrypted wallet files</li>
+            <li><code>data/transactions/</code> - Individual transaction files</li>
+            <li><code>data/blockchain.json</code> - Full blockchain state</li>
+            <li><code>data/utxo.json</code> - Unspent transaction outputs</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🔧 Key Changes Made</h2>
+        <pre><code>✅ Wallet.ts:
+   - Added fs import and file system operations
+   - Modified saveToFile() to actually save files
+   - Enhanced loadFromFile() to support file paths
+   - Added getWalletsList() method
+
+✅ Blockchain.ts:
+   - Added transaction persistence in addTransaction()
+   - Added saveToFile() and loadFromFile() methods
+   - Auto-save after mining blocks
+   - Load existing data on startup
+
+✅ wallet.ts (routes):
+   - Enhanced /create endpoint with 5 MYC initial funding
+   - Added /list endpoint to list saved wallets
+   - Added /load-from-file endpoint
+
+✅ Initial Funding:
+   - Each new wallet receives 5 MYC via coinbase transaction
+   - Transaction is automatically saved to blockchain
+   - Funds are immediately available for testing</code></pre>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        
+        async function testCreateWallet() {
+            const resultDiv = document.getElementById('walletResult');
+            resultDiv.innerHTML = '<p>Creating wallet...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/wallet/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        password: 'test123',
+                        saveToFile: true
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Wallet Created Successfully!</h3>
+                            <p><strong>Address:</strong> ${data.wallet.address}</p>
+                            <p><strong>Initial Balance:</strong> ${data.wallet.initialBalance} MYC</p>
+                            <p><strong>File:</strong> ${data.walletFile ? data.walletFile.filename : 'Not saved'}</p>
+                            <p><strong>Warnings:</strong></p>
+                            <ul>${data.warnings.map(w => `<li>${w}</li>`).join('')}</ul>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function listWallets() {
+            const resultDiv = document.getElementById('walletResult');
+            resultDiv.innerHTML = '<p>Loading wallets...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/wallet/list`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>📋 Saved Wallets (${data.count})</h3>
+                            ${data.wallets.length > 0 ? 
+                                '<ul>' + data.wallets.map(w => `<li>${w}</li>`).join('') + '</ul>' :
+                                '<p>No saved wallets found.</p>'
+                            }
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

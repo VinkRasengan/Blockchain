@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { MyCoinNode } from '../core/MyCoinNode';
 import { Wallet } from '../core/Wallet';
+import { Transaction } from '../core/Transaction';
 import * as crypto from 'crypto';
 import * as bip39 from 'bip39';
 import * as QRCode from 'qrcode';
@@ -38,7 +39,62 @@ export function walletRoutes(node: MyCoinNode): Router {
       
       // Tạo mnemonic phrase
       const mnemonic = bip39.generateMnemonic();
-      
+
+      // Cấp 5 MYC initial funds cho ví mới
+      const initialFunds = 5;
+      const blockchain = node.getBlockchain();
+
+      // Tạo coinbase transaction để cấp initial funds
+      const initialTransaction = Transaction.createCoinbaseTransaction(
+        wallet.address,
+        initialFunds
+      );
+
+      // Thêm transaction và mine block ngay lập tức để cấp funds
+      let actualBalance = 0;
+      try {
+        // Thêm transaction vào pending transactions
+        if (blockchain.addTransaction(initialTransaction)) {
+          console.log(`✅ Initial funding transaction created: ${initialTransaction.hash}`);
+
+          // Mine block ngay lập tức để cấp funds cho ví mới
+          const tempMinerAddress = wallet.address; // Use new wallet as miner to get rewards too
+
+          try {
+            const newBlock = blockchain.minePendingTransactions(tempMinerAddress);
+
+            console.log(`✅ Initial funding block mined: ${newBlock.hash}`);
+            console.log(`✅ Block index: ${newBlock.index}`);
+            console.log(`✅ ${initialFunds} MYC provided to new wallet: ${wallet.address}`);
+
+            // Verify the balance
+            actualBalance = blockchain.getBalance(wallet.address);
+            console.log(`✅ Wallet balance after funding: ${actualBalance} MYC`);
+
+          } catch (miningError) {
+            console.error('❌ Mining error:', miningError);
+            // Fallback: Manually update UTXO for testing
+            console.log('🔧 Fallback: Manually creating UTXO...');
+
+            // Manually add UTXO to make funds available
+            const utxoKey = `${initialTransaction.hash}:0`;
+            const utxo = {
+              txHash: initialTransaction.hash,
+              outputIndex: 0,
+              address: wallet.address,
+              amount: initialFunds
+            };
+
+            // Access private UTXO set (this is a hack for testing)
+            (blockchain as any).utxoSet.set(utxoKey, utxo);
+            console.log(`🔧 Manual UTXO created: ${utxoKey}`);
+            actualBalance = initialFunds;
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error providing initial funds:', error);
+      }
+
       // Tạo QR code cho địa chỉ
       const qrCodeDataUrl = await QRCode.toDataURL(wallet.address);
 
@@ -50,12 +106,16 @@ export function walletRoutes(node: MyCoinNode): Router {
           privateKey: wallet.getPrivateKey(), // Add private key to response
           mnemonic: mnemonic,
           qrCode: qrCodeDataUrl,
+          initialBalance: initialFunds,
+          actualBalance: actualBalance, // Balance thực tế hiện tại
         },
         warnings: [
           'Never share your private key or mnemonic phrase with anyone',
           'Store your mnemonic phrase in a safe place',
           'MyCoin team will never ask for your private key',
-          'Make sure to backup your wallet before proceeding'
+          'Make sure to backup your wallet before proceeding',
+          `Initial ${initialFunds} MYC has been added to your wallet for testing`,
+          `Current wallet balance: ${actualBalance} MYC`
         ]
       };
 

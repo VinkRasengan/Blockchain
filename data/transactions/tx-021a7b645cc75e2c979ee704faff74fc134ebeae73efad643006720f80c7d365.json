@@ -1,0 +1,24 @@
+{
+  "hash": "021a7b645cc75e2c979ee704faff74fc134ebeae73efad643006720f80c7d365",
+  "timestamp": 1757332298899,
+  "inputs": [
+    {
+      "txHash": "ee15e626c36b8d97d01ef56ecdee28f7dc54eb289196a7034146cb6f232574d0",
+      "outputIndex": 0,
+      "signature": "304502204fea969ed58cac7c143bfa3b9213fc9430374230b6bb6eaa355147dc7ea934e40221009a10c2c15f30d5e53d6dcda98b3bae56bea62d6e81ca2c48286d9069b3197ca0",
+      "publicKey": "04a6dd400936fabd481f3c695f4d2d60730acafef4d5df2ed6ef6d331e4a57c6b671812de5cee3f7543709a5f961efaab7cfca156e33c88bc959df1eee732b9d68"
+    }
+  ],
+  "outputs": [
+    {
+      "address": "1srdouhReJiCbCbpokH7bX3CFUVvwDvAo",
+      "amount": 5
+    },
+    {
+      "address": "12WdGvDA61veV1UrDfGsDDMLHss86v4xDL",
+      "amount": 44
+    }
+  ],
+  "fee": 1,
+  "savedAt": 1757332298912
+}

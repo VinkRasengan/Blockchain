@@ -1,4 +1,6 @@
 import * as crypto from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
 import { ec as EC } from 'elliptic';
 import { Transaction, TransactionInput, TransactionOutput } from './Transaction';
 import { Blockchain, UTXO } from './Blockchain';
@@ -142,15 +144,53 @@ export class Wallet {
       createdAt: Date.now()
     };
 
-    // Trong môi trường thực tế, sẽ lưu vào file system
-    // Ở đây chỉ return data để demo
+    // Tạo thư mục wallets nếu chưa tồn tại
+    const walletsDir = path.join(process.cwd(), 'data', 'wallets');
+    if (!fs.existsSync(walletsDir)) {
+      fs.mkdirSync(walletsDir, { recursive: true });
+    }
+
+    // Tạo tên file nếu không được cung cấp
+    const fileName = filePath || `wallet-${this.address.substring(0, 8)}-${Date.now()}.json`;
+    const fullPath = path.join(walletsDir, fileName);
+
+    try {
+      fs.writeFileSync(fullPath, JSON.stringify(walletData, null, 2));
+      console.log(`Wallet saved to: ${fullPath}`);
+    } catch (error) {
+      console.error('Error saving wallet to file:', error);
+      throw new Error('Failed to save wallet to file system');
+    }
+
     return walletData;
   }
 
   /**
    * Tải ví từ file
    */
-  static loadFromFile(walletData: WalletData, passphrase: string): Wallet {
+  static loadFromFile(walletData: WalletData, passphrase: string): Wallet;
+  static loadFromFile(filePath: string, passphrase: string): Wallet;
+  static loadFromFile(dataOrPath: WalletData | string, passphrase: string): Wallet {
+    let walletData: WalletData;
+
+    if (typeof dataOrPath === 'string') {
+      // Load from file path
+      const fullPath = path.isAbsolute(dataOrPath) 
+        ? dataOrPath 
+        : path.join(process.cwd(), 'data', 'wallets', dataOrPath);
+      
+      try {
+        const fileContent = fs.readFileSync(fullPath, 'utf8') as string;
+        walletData = JSON.parse(fileContent);
+      } catch (error) {
+        console.error('Error loading wallet from file:', error);
+        throw new Error('Failed to load wallet from file system');
+      }
+    } else {
+      // Load from wallet data object
+      walletData = dataOrPath;
+    }
+
     const privateKey = Wallet.decryptPrivateKey(walletData.privateKey, passphrase);
     return new Wallet(privateKey);
   }
@@ -285,5 +325,24 @@ export class Wallet {
       publicKey: this.publicKey,
       // Không trả về private key vì lý do bảo mật
     };
+  }
+
+  /**
+   * Lấy danh sách các ví đã lưu
+   */
+  static getWalletsList(): string[] {
+    const walletsDir = path.join(process.cwd(), 'data', 'wallets');
+    
+    if (!fs.existsSync(walletsDir)) {
+      return [];
+    }
+
+    try {
+      const files = fs.readdirSync(walletsDir);
+      return files.filter(file => file.endsWith('.json'));
+    } catch (error) {
+      console.error('Error listing wallets:', error);
+      return [];
+    }
   }
 }

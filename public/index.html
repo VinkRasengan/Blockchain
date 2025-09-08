@@ -15,12 +15,34 @@
             <div class="logo">
                 <i class="fas fa-coins"></i>
                 <h1>MyCoin</h1>
+                <span class="version">v1.0.0</span>
             </div>
             <nav class="nav">
-                <a href="#" class="nav-link">Wallet</a>
-                <a href="#" class="nav-link" onclick="showExplorer()">Explorer</a>
-                <a href="#" class="nav-link" onclick="showNetworkStats()">Network</a>
-                <button class="btn btn-outline" onclick="switchLanguage()">EN</button>
+                <a href="#" class="nav-link" onclick="showWelcome()">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="#" class="nav-link" onclick="showExplorer()">
+                    <i class="fas fa-search"></i> Explorer
+                </a>
+                <a href="#" class="nav-link" onclick="showNetworkStats()">
+                    <i class="fas fa-network-wired"></i> Network
+                </a>
+                <div class="nav-dropdown">
+                    <button class="nav-link dropdown-toggle">
+                        <i class="fas fa-cog"></i> Settings
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="#" onclick="toggleDarkMode()">
+                            <i class="fas fa-moon"></i> Dark Mode
+                        </a>
+                        <a href="#" onclick="showAbout()">
+                            <i class="fas fa-info-circle"></i> About
+                        </a>
+                        <a href="https://github.com/VinkRasengan/Blockchain" target="_blank">
+                            <i class="fab fa-github"></i> GitHub
+                        </a>
+                    </div>
+                </div>
             </nav>
         </div>
     </header>
@@ -36,12 +58,16 @@
                 </div>
 
                 <div class="wallet-options">
-                    <div class="option-card" onclick="showCreateWallet()">
+                    <div class="option-card featured" onclick="showCreateWallet()">
                         <div class="icon">
                             <i class="fas fa-plus-circle"></i>
                         </div>
                         <h3>Create New Wallet</h3>
                         <p>Generate a new wallet with private key and mnemonic phrase</p>
+                        <div class="card-features">
+                            <span class="feature"><i class="fas fa-shield-alt"></i> Secure</span>
+                            <span class="feature"><i class="fas fa-gift"></i> 5 MYC Free</span>
+                        </div>
                     </div>
 
                     <div class="option-card" onclick="showAccessWallet()">
@@ -50,6 +76,10 @@
                         </div>
                         <h3>Access My Wallet</h3>
                         <p>Access your existing wallet using private key or keystore file</p>
+                        <div class="card-features">
+                            <span class="feature"><i class="fas fa-lock"></i> Encrypted</span>
+                            <span class="feature"><i class="fas fa-qrcode"></i> QR Support</span>
+                        </div>
                     </div>
 
                     <div class="option-card" onclick="showImportWallet()">
@@ -58,6 +88,22 @@
                         </div>
                         <h3>Import Wallet</h3>
                         <p>Import wallet from mnemonic phrase or private key</p>
+                        <div class="card-features">
+                            <span class="feature"><i class="fas fa-history"></i> Restore</span>
+                            <span class="feature"><i class="fas fa-file-import"></i> Multiple Formats</span>
+                        </div>
+                    </div>
+
+                    <div class="option-card" onclick="showExplorer()">
+                        <div class="icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3>Explore Blockchain</h3>
+                        <p>Browse blocks, transactions, and network statistics</p>
+                        <div class="card-features">
+                            <span class="feature"><i class="fas fa-chart-line"></i> Analytics</span>
+                            <span class="feature"><i class="fas fa-cubes"></i> Real-time</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -348,14 +394,120 @@
             </div>
         </div>
 
+        <!-- About Modal -->
+        <div class="modal hidden" id="aboutModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>About MyCoin</h3>
+                    <button class="modal-close" onclick="closeAboutModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="about-content">
+                        <div class="about-logo">
+                            <i class="fas fa-coins"></i>
+                            <h2>MyCoin v1.0.0</h2>
+                        </div>
+                        <p>MyCoin là một hệ thống tiền điện tử hoàn chỉnh được xây dựng từ đầu với:</p>
+                        <ul>
+                            <li><i class="fas fa-check"></i> Blockchain với Proof of Work & Proof of Stake</li>
+                            <li><i class="fas fa-check"></i> Web Wallet tương tự MyEtherWallet</li>
+                            <li><i class="fas fa-check"></i> Block Explorer giống Etherscan</li>
+                            <li><i class="fas fa-check"></i> P2P Network và RESTful API</li>
+                        </ul>
+                        <div class="about-stats">
+                            <div class="stat">
+                                <strong>Technology:</strong> Node.js, TypeScript, Express
+                            </div>
+                            <div class="stat">
+                                <strong>Consensus:</strong> PoW (SHA-256) & PoS
+                            </div>
+                            <div class="stat">
+                                <strong>Security:</strong> ECDSA, AES-256-GCM
+                            </div>
+                        </div>
+                        <div class="about-links">
+                            <a href="https://github.com/VinkRasengan/Blockchain" target="_blank" class="btn btn-outline">
+                                <i class="fab fa-github"></i> GitHub Repository
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Network Stats Modal -->
+        <div class="modal hidden" id="networkStatsModal">
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <h3>Network Statistics</h3>
+                    <button class="modal-close" onclick="closeNetworkStatsModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="network-stats-content">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-cubes"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value" id="networkBlocks">0</div>
+                                    <div class="stat-label">Total Blocks</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value" id="networkTransactions">0</div>
+                                    <div class="stat-label">Total Transactions</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-network-wired"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value" id="networkPeers">0</div>
+                                    <div class="stat-label">Connected Peers</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-value" id="networkDifficulty">0</div>
+                                    <div class="stat-label">Mining Difficulty</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="network-chart">
+                            <h4>Block Production Rate</h4>
+                            <canvas id="blockChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Block Explorer Section -->
         <section class="explorer-section hidden" id="explorerSection">
             <div class="container">
                 <div class="explorer-header">
-                    <button class="back-btn" onclick="showWalletDashboard()">
-                        <i class="fas fa-arrow-left"></i> Back to Wallet
+                    <button class="back-btn" onclick="showWelcome()">
+                        <i class="fas fa-arrow-left"></i> Back to Home
                     </button>
                     <h2>MyCoin Block Explorer</h2>
+                    <div class="explorer-actions">
+                        <button class="btn btn-outline" onclick="refreshExplorer()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
                 </div>
 
                 <div class="search-section">

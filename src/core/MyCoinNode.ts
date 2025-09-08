@@ -5,6 +5,11 @@ import { Blockchain } from './Blockchain';
 import { P2PNetwork } from './P2PNetwork';
 import { Wallet } from './Wallet';
 import { Transaction } from './Transaction';
+import { walletRoutes } from '../routes/wallet';
+import { transactionRoutes } from '../routes/transaction';
+import { blockchainRoutes } from '../routes/blockchain';
+import { networkRoutes } from '../routes/network';
+import { miningRoutes } from '../routes/mining';
 
 // Utility function to get error message
 function getErrorMessage(error: unknown): string {
@@ -38,7 +43,31 @@ export class MyCoinNode {
     app.use(cors());
     app.use(express.json());
 
-    // API endpoints
+    // Add structured API routes
+    app.use('/api/wallet', walletRoutes(this));
+    app.use('/api/transaction', transactionRoutes(this));
+    app.use('/api/transactions', transactionRoutes(this)); // Alias
+    app.use('/api/blockchain', blockchainRoutes(this));
+    app.use('/api/network', networkRoutes(this));
+    app.use('/api/mining', miningRoutes(this));
+
+    // Health check
+    app.get('/api/health', (req: Request, res: Response) => {
+      res.json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        blockchain: {
+          blocks: this.blockchain.chain.length,
+          difficulty: this.blockchain.difficulty,
+          pendingTransactions: this.blockchain.pendingTransactions.length,
+        },
+        network: {
+          peers: this.p2pNetwork.getPeers().length,
+        }
+      });
+    });
+
+    // Legacy endpoints for backwards compatibility
     app.get('/blocks', (req: Request, res: Response) => {
       res.json(this.blockchain.chain);
     });

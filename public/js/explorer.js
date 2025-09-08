@@ -1,7 +1,7 @@
 // Block Explorer functionality for MyCoin
 class BlockExplorer {
     constructor() {
-        this.apiBase = '/api';
+        this.apiBase = 'http://localhost:3002/api';
         this.currentPage = 1;
         this.itemsPerPage = 10;
         this.searchCache = new Map();

@@ -2,7 +2,7 @@
 class MyCoinWallet {
     constructor() {
         this.currentWallet = null;
-        this.apiBase = '/api';
+        this.apiBase = 'http://localhost:3002/api';
         this.init();
     }
 
@@ -197,8 +197,13 @@ class MyCoinWallet {
             this.currentWallet = {
                 address: data.wallet.address,
                 publicKey: data.wallet.publicKey,
-                privateKey: privateKey || 'dummy-key'
+                privateKey: privateKey // Remove fallback to dummy-key
             };
+
+            // Validate we have a real private key before enabling access
+            if (!privateKey || privateKey === 'dummy-key') {
+                throw new Error('Private key not available - cannot complete wallet creation');
+            }
 
             // Enable access wallet button
             const accessBtn = document.getElementById('accessWalletBtn');
@@ -574,6 +579,12 @@ class MyCoinWallet {
 
         if (amount <= 0) {
             this.showToast('Amount must be greater than 0', 'error');
+            return;
+        }
+
+        // Validate private key before sending
+        if (!this.currentWallet || !this.currentWallet.privateKey || this.currentWallet.privateKey === 'dummy-key') {
+            this.showToast('Private key not available. Please reload your wallet.', 'error');
             return;
         }
 

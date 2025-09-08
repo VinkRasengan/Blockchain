@@ -1,6 +1,8 @@
 import { Block } from './Block';
 import { Transaction, TransactionOutput } from './Transaction';
 import { ProofOfStake } from './ProofOfStake';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export interface UTXO {
   txHash: string;
@@ -15,7 +17,7 @@ export enum ConsensusType {
 }
 
 export class Blockchain {
-  public chain: Block[];
+  public chain: Block[] = [];
   public difficulty: number;
   public miningReward: number;
   public pendingTransactions: Transaction[];
@@ -24,22 +26,30 @@ export class Blockchain {
   public proofOfStake: ProofOfStake;
 
   constructor(consensusType: ConsensusType = ConsensusType.PROOF_OF_WORK) {
-    this.chain = [Block.createGenesisBlock()];
+    this.consensusType = consensusType;
     this.difficulty = 4;
     this.miningReward = 50;
     this.pendingTransactions = [];
     this.utxoSet = new Map();
-    this.consensusType = consensusType;
     this.proofOfStake = new ProofOfStake(this);
 
-    // Khởi tạo UTXO set từ genesis block
-    this.updateUTXOSet(this.chain[0]);
+    // Thử tải dữ liệu từ file system trước
+    if (!this.loadFromFile()) {
+      // Nếu không có dữ liệu, khởi tạo với genesis block
+      this.chain = [Block.createGenesisBlock()];
+      // Khởi tạo UTXO set từ genesis block
+      this.updateUTXOSet(this.chain[0]);
+      console.log('Initialized new blockchain with genesis block');
+    }
   }
 
   /**
    * Lấy block cuối cùng
    */
   getLatestBlock(): Block {
+    if (this.chain.length === 0) {
+      throw new Error('Blockchain is empty - no genesis block found');
+    }
     return this.chain[this.chain.length - 1];
   }
 
@@ -59,6 +69,10 @@ export class Blockchain {
     }
 
     this.pendingTransactions.push(transaction);
+    
+    // Lưu giao dịch vào file system
+    this.saveTransactionToFile(transaction);
+    
     return true;
   }
 
@@ -68,12 +82,15 @@ export class Blockchain {
   verifyTransaction(transaction: Transaction): boolean {
     let totalInput = 0;
 
-    for (const input of transaction.inputs) {
-      // Skip coinbase transaction
-      if (input.txHash === '0'.repeat(64)) {
-        continue;
-      }
+    // Check if this is a coinbase transaction
+    if (transaction.inputs.length === 1 && 
+        transaction.inputs[0].txHash === '0'.repeat(64) && 
+        transaction.inputs[0].outputIndex === -1) {
+      // Coinbase transaction - always valid as it creates new coins
+      return true;
+    }
 
+    for (const input of transaction.inputs) {
       const utxoKey = `${input.txHash}:${input.outputIndex}`;
       const utxo = this.utxoSet.get(utxoKey);
 
@@ -126,6 +143,9 @@ export class Blockchain {
 
     // Xóa pending transactions
     this.pendingTransactions = [];
+
+    // Lưu blockchain vào file system
+    this.saveToFile();
 
     return block;
   }
@@ -181,6 +201,9 @@ export class Blockchain {
 
     // Xóa pending transactions
     this.pendingTransactions = [];
+
+    // Lưu blockchain vào file system
+    this.saveToFile();
 
     console.log(`Block ${block.index} created by validator ${selectedValidator}`);
     return block;
@@ -362,8 +385,16 @@ export class Blockchain {
       difficulty: this.difficulty,
       miningReward: this.miningReward,
       pendingTransactions: this.pendingTransactions.length,
-      totalUTXOs: this.utxoSet.size
+      totalUTXOs: this.utxoSet.size,
+      consensusType: this.consensusType
     };
+  }
+
+  /**
+   * Lấy ProofOfStake instance
+   */
+  getProofOfStake(): ProofOfStake {
+    return this.proofOfStake;
   }
 
   /**
@@ -418,5 +449,104 @@ export class Blockchain {
 
     // Ước tính hash rate (hashes per second)
     return Math.pow(2, averageDifficulty) / (averageTime / 1000);
+  }
+
+  /**
+   * Lưu giao dịch vào file system
+   */
+  private saveTransactionToFile(transaction: Transaction): void {
+    const transactionsDir = path.join(process.cwd(), 'data', 'transactions');
+    
+    if (!fs.existsSync(transactionsDir)) {
+      fs.mkdirSync(transactionsDir, { recursive: true });
+    }
+
+    const fileName = `tx-${transaction.hash}.json`;
+    const filePath = path.join(transactionsDir, fileName);
+
+    try {
+      const transactionData = {
+        hash: transaction.hash,
+        timestamp: transaction.timestamp,
+        inputs: transaction.inputs,
+        outputs: transaction.outputs,
+        fee: transaction.fee,
+        savedAt: Date.now()
+      };
+
+      fs.writeFileSync(filePath, JSON.stringify(transactionData, null, 2));
+      console.log(`Transaction saved: ${fileName}`);
+    } catch (error) {
+      console.error('Error saving transaction to file:', error);
+    }
+  }
+
+  /**
+   * Lưu blockchain vào file system
+   */
+  saveToFile(): void {
+    const blockchainDir = path.join(process.cwd(), 'data');
+    
+    if (!fs.existsSync(blockchainDir)) {
+      fs.mkdirSync(blockchainDir, { recursive: true });
+    }
+
+    try {
+      // Lưu blockchain data
+      const blockchainData = {
+        chain: this.chain,
+        difficulty: this.difficulty,
+        miningReward: this.miningReward,
+        consensusType: this.consensusType,
+        savedAt: Date.now()
+      };
+
+      const blockchainFile = path.join(blockchainDir, 'blockchain.json');
+      fs.writeFileSync(blockchainFile, JSON.stringify(blockchainData, null, 2));
+
+      // Lưu UTXO set
+      const utxoArray = Array.from(this.utxoSet.entries());
+      const utxoFile = path.join(blockchainDir, 'utxo.json');
+      fs.writeFileSync(utxoFile, JSON.stringify(utxoArray, null, 2));
+
+      console.log('Blockchain data saved to file system');
+    } catch (error) {
+      console.error('Error saving blockchain to file:', error);
+    }
+  }
+
+  /**
+   * Tải blockchain từ file system
+   */
+  loadFromFile(): boolean {
+    const blockchainFile = path.join(process.cwd(), 'data', 'blockchain.json');
+    const utxoFile = path.join(process.cwd(), 'data', 'utxo.json');
+    let loaded = false;
+
+    try {
+      if (fs.existsSync(blockchainFile)) {
+        const blockchainData = JSON.parse(fs.readFileSync(blockchainFile, 'utf8') as string);
+        
+        this.chain = blockchainData.chain;
+        this.difficulty = blockchainData.difficulty;
+        this.miningReward = blockchainData.miningReward;
+        this.consensusType = blockchainData.consensusType;
+        loaded = true;
+
+        console.log(`Loaded blockchain with ${this.chain.length} blocks`);
+      }
+
+      if (fs.existsSync(utxoFile)) {
+        const utxoArray = JSON.parse(fs.readFileSync(utxoFile, 'utf8') as string);
+        this.utxoSet = new Map(utxoArray);
+        
+        console.log(`Loaded ${this.utxoSet.size} UTXOs`);
+      }
+
+      return loaded; // Chỉ return true nếu thực sự load được blockchain
+    } catch (error) {
+      console.error('Error loading blockchain from file:', error);
+      return false;
+    }
   }
 }

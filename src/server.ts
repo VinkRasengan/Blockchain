@@ -16,10 +16,10 @@ export class MyCoinWebServer {
   private node: MyCoinNode;
   private port: number;
 
-  constructor(port: number = 3000) {
+  constructor(port: number = 8080) {
     this.port = port;
     this.app = express();
-    this.node = new MyCoinNode(3002, 6001); // API port và P2P port
+    this.node = new MyCoinNode(3002, 6001); // Backend API trên port 3002
     
     this.setupMiddleware();
     this.setupRoutes();
@@ -36,8 +36,9 @@ export class MyCoinWebServer {
         directives: {
           defaultSrc: ["'self'"],
           styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
-          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-          scriptSrcAttr: ["'unsafe-inline'"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
+          scriptSrcElem: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
+          scriptSrcAttr: ["'unsafe-inline'"], // Allow inline event handlers
           imgSrc: ["'self'", "data:", "https:"],
           connectSrc: ["'self'", "ws:", "wss:", "http:", "https:"],
           fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "data:"],
@@ -99,28 +100,18 @@ export class MyCoinWebServer {
       });
     });
 
-    // API Health check
+    // API Health check - proxy to backend
     this.app.get('/api/health', (req: Request, res: Response) => {
       res.json({
-        status: 'OK',
+        status: 'Frontend OK',
         timestamp: new Date().toISOString(),
-        blockchain: {
-          blocks: this.node.getBlockchain().chain.length,
-          difficulty: this.node.getBlockchain().difficulty,
-          pendingTransactions: this.node.getBlockchain().pendingTransactions.length,
-        },
-        network: {
-          peers: this.node.getP2PNetwork().getPeers().length,
-        }
+        backendAPI: 'http://localhost:3002/api',
+        message: 'Frontend server running. API calls should go to http://localhost:3002/api'
       });
     });
 
-    // API routes
-    this.app.use('/api/wallet', walletRoutes(this.node));
-    this.app.use('/api/transaction', transactionRoutes(this.node));
-    this.app.use('/api/blockchain', blockchainRoutes(this.node));
-    this.app.use('/api/network', networkRoutes(this.node));
-    this.app.use('/api/mining', miningRoutes(this.node));
+    // Note: Actual API routes are handled by MyCoinNode on port 3002
+    // Frontend will make API calls directly to localhost:3002
 
     // Error handling middleware
     this.app.use((err: any, req: Request, res: Response, next: NextFunction) => {

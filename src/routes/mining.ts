@@ -23,6 +23,77 @@ export function miningRoutes(node: MyCoinNode): Router {
   const router = Router();
 
   /**
+   * Mine một block mới (alias cho /start)
+   * POST /api/mining/mine
+   */
+  router.post('/mine', (req: Request, res: Response) => {
+    try {
+      const { minerAddress } = req.body;
+
+      if (!minerAddress) {
+        return res.status(400).json({
+          success: false,
+          error: 'Miner address is required'
+        });
+      }
+
+      // Validate miner address
+      if (!isValidAddress(minerAddress)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid miner address format'
+        });
+      }
+
+      const blockchain = node.getBlockchain();
+
+      // Kiểm tra có pending transactions không
+      if (blockchain.pendingTransactions.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'No pending transactions to mine'
+        });
+      }
+
+      try {
+        // Bắt đầu mining
+        const newBlock = blockchain.minePendingTransactions(minerAddress);
+
+        // Broadcast block mới đến network
+        node.getP2PNetwork().broadcastNewBlock(newBlock);
+
+        res.json({
+          success: true,
+          message: 'Block mined successfully',
+          block: {
+            index: newBlock.index,
+            hash: newBlock.hash,
+            previousHash: newBlock.previousHash,
+            timestamp: newBlock.timestamp,
+            nonce: newBlock.nonce,
+            difficulty: newBlock.difficulty,
+            transactions: newBlock.transactions.length,
+            minerAddress: minerAddress,
+            reward: blockchain.miningReward
+          }
+        });
+      } catch (miningError) {
+        res.status(500).json({
+          success: false,
+          error: 'Mining failed',
+          message: getErrorMessage(miningError)
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: 'Mining request failed',
+        message: getErrorMessage(error)
+      });
+    }
+  });
+
+  /**
    * Bắt đầu mining
    * POST /api/mining/start
    */
@@ -625,6 +696,269 @@ export function miningRoutes(node: MyCoinNode): Router {
       res.status(500).json({
         success: false,
         error: 'Failed to switch consensus type',
+        message: getErrorMessage(error)
+      });
+    }
+  });
+
+  /**
+   * Stake coins để trở thành validator (PoS)
+   * POST /api/mining/stake
+   */
+  router.post('/stake', (req: Request, res: Response) => {
+    try {
+      const { address, amount } = req.body;
+
+      if (!address || !amount) {
+        return res.status(400).json({
+          success: false,
+          error: 'Address and amount are required'
+        });
+      }
+
+      if (amount <= 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Stake amount must be positive'
+        });
+      }
+
+      const blockchain = node.getBlockchain();
+      const pos = blockchain.getProofOfStake();
+
+      if (!pos) {
+        return res.status(500).json({
+          success: false,
+          error: 'Proof of Stake not available'
+        });
+      }
+
+      const success = pos.stake(address, amount);
+
+      if (success) {
+        res.json({
+          success: true,
+          message: `Successfully staked ${amount} MYC`,
+          validator: pos.getValidator(address),
+          stake: pos.getStake(address)
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          error: 'Failed to stake coins'
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: 'Staking failed',
+        message: getErrorMessage(error)
+      });
+    }
+  });
+
+  /**
+   * Unstake coins (PoS)
+   * POST /api/mining/unstake
+   */
+  router.post('/unstake', (req: Request, res: Response) => {
+    try {
+      const { address, amount } = req.body;
+
+      if (!address || !amount) {
+        return res.status(400).json({
+          success: false,
+          error: 'Address and amount are required'
+        });
+      }
+
+      if (amount <= 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Unstake amount must be positive'
+        });
+      }
+
+      const blockchain = node.getBlockchain();
+      const pos = blockchain.getProofOfStake();
+
+      if (!pos) {
+        return res.status(500).json({
+          success: false,
+          error: 'Proof of Stake not available'
+        });
+      }
+
+      const success = pos.unstake(address, amount);
+
+      if (success) {
+        res.json({
+          success: true,
+          message: `Successfully unstaked ${amount} MYC`,
+          validator: pos.getValidator(address),
+          stake: pos.getStake(address)
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          error: 'Failed to unstake coins'
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: 'Unstaking failed',
+        message: getErrorMessage(error)
+      });
+    }
+  });
+
+  /**
+   * Lấy thông tin validator
+   * GET /api/mining/validator/:address
+   */
+  router.get('/validator/:address', (req: Request, res: Response) => {
+    try {
+      const { address } = req.params;
+      const blockchain = node.getBlockchain();
+      const pos = blockchain.getProofOfStake();
+
+      if (!pos) {
+        return res.status(500).json({
+          success: false,
+          error: 'Proof of Stake not available'
+        });
+      }
+
+      const validator = pos.getValidator(address);
+      const stake = pos.getStake(address);
+
+      res.json({
+        success: true,
+        validator: validator || null,
+        stake: stake || null,
+        isValidator: !!validator
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get validator info',
+        message: getErrorMessage(error)
+      });
+    }
+  });
+
+  /**
+   * Lấy danh sách tất cả validators
+   * GET /api/mining/validators
+   */
+  router.get('/validators', (req: Request, res: Response) => {
+    try {
+      const blockchain = node.getBlockchain();
+      const pos = blockchain.getProofOfStake();
+
+      if (!pos) {
+        return res.status(500).json({
+          success: false,
+          error: 'Proof of Stake not available'
+        });
+      }
+
+      const validators = pos.getAllValidators();
+      const stakes = pos.getAllStakes();
+      const stats = pos.getStats();
+
+      res.json({
+        success: true,
+        validators: validators,
+        stakes: stakes,
+        stats: stats
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get validators',
+        message: getErrorMessage(error)
+      });
+    }
+  });
+
+  /**
+   * Mine block với PoS
+   * POST /api/mining/mine-pos
+   */
+  router.post('/mine-pos', (req: Request, res: Response) => {
+    try {
+      const { validatorAddress } = req.body;
+
+      if (!validatorAddress) {
+        return res.status(400).json({
+          success: false,
+          error: 'Validator address is required'
+        });
+      }
+
+      const blockchain = node.getBlockchain();
+      const pos = blockchain.getProofOfStake();
+
+      if (!pos) {
+        return res.status(500).json({
+          success: false,
+          error: 'Proof of Stake not available'
+        });
+      }
+
+      // Kiểm tra validator
+      const validator = pos.getValidator(validatorAddress);
+      if (!validator || !validator.isActive) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid or inactive validator'
+        });
+      }
+
+      // Tạo block với PoS
+      const pendingTransactions = blockchain.pendingTransactions;
+      if (pendingTransactions.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'No pending transactions to mine'
+        });
+      }
+
+      const previousHash = blockchain.getLatestBlock().hash;
+      const newBlock = pos.createBlock(validatorAddress, pendingTransactions, previousHash);
+
+      if (!newBlock) {
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to create block'
+        });
+      }
+
+      // Thêm block vào blockchain
+      blockchain.chain.push(newBlock);
+      blockchain.pendingTransactions = [];
+
+      // Broadcast block mới
+      node.getP2PNetwork().broadcastNewBlock(newBlock);
+
+      res.json({
+        success: true,
+        message: 'Block created successfully with PoS',
+        block: {
+          index: newBlock.index,
+          hash: newBlock.hash,
+          timestamp: newBlock.timestamp,
+          transactions: newBlock.transactions.length,
+          validator: validatorAddress,
+          consensusType: 'PoS'
+        }
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: 'PoS mining failed',
         message: getErrorMessage(error)
       });
     }

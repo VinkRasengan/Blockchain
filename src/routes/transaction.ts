@@ -416,6 +416,58 @@ export function transactionRoutes(node: MyCoinNode): Router {
     }
   });
 
+  /**
+   * Lấy danh sách transactions của một address
+   * GET /api/transactions/:address
+   */
+  router.get('/:address', (req: Request, res: Response) => {
+    try {
+      const { address } = req.params;
+      const { page = '1', limit = '10' } = req.query;
+
+      // Validate address
+      if (!isValidAddress(address)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid wallet address format'
+        });
+      }
+
+      const blockchain = node.getBlockchain();
+      
+      // Get transaction history for the address
+      const transactions = blockchain.getTransactionHistory(address);
+      
+      // Pagination
+      const pageNum = Math.max(1, parseInt(page as string, 10));
+      const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10)));
+      const startIndex = (pageNum - 1) * limitNum;
+      const endIndex = startIndex + limitNum;
+      
+      const paginatedTransactions = transactions.slice(startIndex, endIndex);
+      
+      res.json({
+        success: true,
+        address: address,
+        transactions: paginatedTransactions,
+        pagination: {
+          currentPage: pageNum,
+          totalTransactions: transactions.length,
+          totalPages: Math.ceil(transactions.length / limitNum),
+          limit: limitNum
+        }
+      });
+
+    } catch (error) {
+      console.error('Error getting transactions for address:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get transactions for address',
+        message: getErrorMessage(error)
+      });
+    }
+  });
+
   return router;
 }
 

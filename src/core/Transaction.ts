@@ -71,6 +71,13 @@ export class Transaction {
    * Xác minh chữ ký của giao dịch
    */
   verifySignature(): boolean {
+    // Skip signature verification for coinbase transactions
+    if (this.inputs.length === 1 && 
+        this.inputs[0].txHash === '0'.repeat(64) && 
+        this.inputs[0].outputIndex === -1) {
+      return true;
+    }
+
     for (const input of this.inputs) {
       if (!input.signature || !input.publicKey) {
         return false;
@@ -96,6 +103,13 @@ export class Transaction {
    * Tính tổng số tiền đầu vào
    */
   getTotalInputAmount(): number {
+    // For coinbase transactions, input amount equals output amount + fee
+    if (this.inputs.length === 1 && 
+        this.inputs[0].txHash === '0'.repeat(64) && 
+        this.inputs[0].outputIndex === -1) {
+      return this.outputs.reduce((sum, output) => sum + output.amount, 0) + this.fee;
+    }
+
     // Trong thực tế, cần tra cứu UTXO để lấy giá trị thực
     // Đây là implementation đơn giản
     return this.outputs.reduce((sum, output) => sum + output.amount, 0) + this.fee;

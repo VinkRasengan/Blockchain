@@ -104,7 +104,7 @@ class MyCoinApp {
 
     // Network connectivity check
     checkNetworkConnection() {
-        return fetch('/api/health')
+        return fetch('http://localhost:3002/api/health')
             .then(response => response.ok)
             .catch(() => false);
     }
@@ -254,7 +254,7 @@ class MyCoinApp {
 
     // Check for application updates
     checkForUpdates() {
-        fetch('/api/version')
+        fetch('http://localhost:3002/api/version')
             .then(response => response.json())
             .then(data => {
                 const currentVersion = '1.0.0';
@@ -387,6 +387,78 @@ function checkBrowserSupport() {
 
 // Check browser support on load
 document.addEventListener('DOMContentLoaded', checkBrowserSupport);
+
+// Additional UI Functions
+function showAbout() {
+    const modal = document.getElementById('aboutModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('show');
+}
+
+function closeAboutModal() {
+    const modal = document.getElementById('aboutModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('show');
+}
+
+function showNetworkStats() {
+    const modal = document.getElementById('networkStatsModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('show');
+    loadNetworkStats();
+}
+
+function closeNetworkStatsModal() {
+    const modal = document.getElementById('networkStatsModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('show');
+}
+
+async function loadNetworkStats() {
+    try {
+        const response = await fetch('/api/blockchain/stats');
+        const data = await response.json();
+
+        if (data.success) {
+            document.getElementById('networkBlocks').textContent = data.stats.totalBlocks;
+            document.getElementById('networkTransactions').textContent = data.stats.totalTransactions;
+            document.getElementById('networkDifficulty').textContent = data.stats.difficulty;
+            document.getElementById('networkPeers').textContent = '0'; // P2P not implemented yet
+        }
+    } catch (error) {
+        console.error('Error loading network stats:', error);
+    }
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', isDark);
+
+    if (typeof wallet !== 'undefined' && wallet.showToast) {
+        wallet.showToast(
+            isDark ? 'Dark mode enabled' : 'Light mode enabled',
+            'success'
+        );
+    }
+}
+
+function refreshExplorer() {
+    if (typeof blockExplorer !== 'undefined') {
+        blockExplorer.loadExplorerData();
+        if (typeof wallet !== 'undefined' && wallet.showToast) {
+            wallet.showToast('Explorer data refreshed', 'success');
+        }
+    }
+}
+
+// Load dark mode preference
+document.addEventListener('DOMContentLoaded', () => {
+    const isDark = localStorage.getItem('darkMode') === 'true';
+    if (isDark) {
+        document.body.classList.add('dark-mode');
+    }
+});
 
 // Export for testing
 if (typeof module !== 'undefined' && module.exports) {

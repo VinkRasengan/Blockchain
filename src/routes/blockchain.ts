@@ -17,6 +17,20 @@ export function blockchainRoutes(node: MyCoinNode): Router {
   router.get('/info', (req: Request, res: Response) => {
     try {
       const blockchain = node.getBlockchain();
+      
+      if (blockchain.chain.length === 0) {
+        return res.json({
+          success: true,
+          blockchain: {
+            totalBlocks: 0,
+            latestBlock: null,
+            difficulty: blockchain.difficulty,
+            miningReward: blockchain.miningReward,
+            pendingTransactions: blockchain.pendingTransactions.length
+          }
+        });
+      }
+
       const latestBlock = blockchain.getLatestBlock();
 
       res.json({
@@ -397,6 +411,139 @@ export function blockchainRoutes(node: MyCoinNode): Router {
       res.status(500).json({
         success: false,
         error: 'Search failed',
+        message: getErrorMessage(error)
+      });
+    }
+  });
+
+  /**
+   * Lấy thống kê chi tiết của mạng
+   * GET /api/blockchain/network-stats
+   */
+  router.get('/network-stats', (req: Request, res: Response) => {
+    try {
+      const blockchain = node.getBlockchain();
+      const p2pNetwork = node.getP2PNetwork();
+
+      // Tính toán thống kê chi tiết
+      const blocks = blockchain.chain;
+      const totalTransactions = blocks.reduce((sum, block) => sum + block.transactions.length, 0);
+      const avgBlockTime = blocks.length > 1 ?
+        (blocks[blocks.length - 1].timestamp - blocks[1].timestamp) / (blocks.length - 1) / 1000 : 0;
+
+      // Thống kê giao dịch theo thời gian
+      const last24Hours = Date.now() - (24 * 60 * 60 * 1000);
+      const recentBlocks = blocks.filter(block => block.timestamp > last24Hours);
+      const recentTransactions = recentBlocks.reduce((sum, block) => sum + block.transactions.length, 0);
+
+      const stats = {
+        blockchain: {
+          totalBlocks: blocks.length,
+          totalTransactions: totalTransactions,
+          difficulty: blockchain.difficulty,
+          miningReward: blockchain.miningReward,
+          pendingTransactions: blockchain.pendingTransactions.length,
+          avgBlockTime: Math.round(avgBlockTime),
+          last24hBlocks: recentBlocks.length,
+          last24hTransactions: recentTransactions
+        },
+        network: {
+          connectedPeers: p2pNetwork.getPeers().length,
+          networkHashrate: blockchain.difficulty * Math.pow(2, 32) / avgBlockTime,
+          nodeUptime: process.uptime()
+        },
+        performance: {
+          memoryUsage: process.memoryUsage(),
+          cpuUsage: process.cpuUsage()
+        }
+      };
+
+      res.json({
+        success: true,
+        stats: stats,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get network statistics',
+        message: getErrorMessage(error)
+      });
+    }
+  });
+
+  /**
+   * Lấy lịch sử blocks gần đây
+   * GET /api/blockchain/recent-blocks
+   */
+  router.get('/recent-blocks', (req: Request, res: Response) => {
+    try {
+      const { limit = 10 } = req.query;
+      const blockchain = node.getBlockchain();
+
+      const recentBlocks = blockchain.chain
+        .slice(-Number(limit))
+        .reverse()
+        .map(block => ({
+          index: block.index,
+          hash: block.hash,
+          timestamp: block.timestamp,
+          transactionCount: block.transactions.length,
+          difficulty: block.difficulty,
+          nonce: block.nonce,
+          size: JSON.stringify(block).length
+        }));
+
+      res.json({
+        success: true,
+        blocks: recentBlocks,
+        total: blockchain.chain.length
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get recent blocks',
+        message: getErrorMessage(error)
+      });
+    }
+  });
+
+  /**
+   * Validate địa chỉ ví
+   * POST /api/blockchain/validate-address
+   */
+  router.post('/validate-address', (req: Request, res: Response) => {
+    try {
+      const { address } = req.body;
+
+      if (!address) {
+        return res.status(400).json({
+          success: false,
+          error: 'Address is required'
+        });
+      }
+
+      // Basic validation - trong thực tế sẽ có validation phức tạp hơn
+      const isValid = typeof address === 'string' &&
+                     address.length >= 26 &&
+                     address.length <= 35 &&
+                     /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/.test(address);
+
+      const blockchain = node.getBlockchain();
+      const balance = isValid ? blockchain.getBalance(address) : 0;
+      const hasTransactions = isValid ? blockchain.getTransactionHistory(address).length > 0 : false;
+
+      res.json({
+        success: true,
+        address: address,
+        isValid: isValid,
+        balance: balance,
+        hasTransactions: hasTransactions
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to validate address',
         message: getErrorMessage(error)
       });
     }

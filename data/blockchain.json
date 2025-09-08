@@ -1,0 +1,402 @@
+{
+  "chain": [
+    {
+      "index": 0,
+      "timestamp": 1757332161751,
+      "transactions": [
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "genesis-address",
+              "amount": 50
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757332161751,
+          "hash": "74c73a262cd106d3060ff613f8e5982d91082b74c354d392d18ba11060dd386c"
+        }
+      ],
+      "previousHash": "0",
+      "difficulty": 4,
+      "nonce": 83348,
+      "merkleRoot": "74c73a262cd106d3060ff613f8e5982d91082b74c354d392d18ba11060dd386c",
+      "hash": "0000675293800ab841fff824cf0d88c285ceef52f243425fae5e6e806f45aa8e"
+    },
+    {
+      "index": 1,
+      "timestamp": 1757332173184,
+      "transactions": [
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "1MRitouJU32E7LdKXzTMFr15YdKFrLiVML",
+              "amount": 50
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757332173184,
+          "hash": "af22049502777276c2433899c57b461b596788f676ffe5720b55369f80dbd064"
+        },
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "1MRitouJU32E7LdKXzTMFr15YdKFrLiVML",
+              "amount": 5
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757332173183,
+          "hash": "de764be0ba629b6b0906a267e2023b3c6ecfc7ce6dfd2a7ecf9ecc07aa9be271"
+        }
+      ],
+      "previousHash": "0000675293800ab841fff824cf0d88c285ceef52f243425fae5e6e806f45aa8e",
+      "difficulty": 4,
+      "nonce": 35690,
+      "merkleRoot": "d5a82997e137a75da99e702e58302619be703dcdce58c7398910baf0eaba6b9f",
+      "hash": "0000d4a81c1849be903fe84bbda83ba3add0a92f4eef57a4c73d7c16ce43a401"
+    },
+    {
+      "index": 2,
+      "timestamp": 1757332196460,
+      "transactions": [
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "1AFUo6ikAJAq6QSgKSVM254Y2xPtosyas",
+              "amount": 50
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757332196460,
+          "hash": "29a24e904656f0e9db6d8d9126cb287d096bb28fa112aea0a220f9e4620b214a"
+        },
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "1AFUo6ikAJAq6QSgKSVM254Y2xPtosyas",
+              "amount": 5
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757332196459,
+          "hash": "675ee48e206af67b94243f7d0bb1e84d86172de21968230c0109d3b59b5a67a3"
+        }
+      ],
+      "previousHash": "0000d4a81c1849be903fe84bbda83ba3add0a92f4eef57a4c73d7c16ce43a401",
+      "difficulty": 4,
+      "nonce": 118263,
+      "merkleRoot": "11635750f63024388e0433824f87637ac887fe88b56f52da849e02697dc0ad08",
+      "hash": "0000cc8830b0b6a5ae83b77eac40e0d652b81b6c6aedb830cf3f99d30181c265"
+    },
+    {
+      "index": 3,
+      "timestamp": 1757332261279,
+      "transactions": [
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "12WdGvDA61veV1UrDfGsDDMLHss86v4xDL",
+              "amount": 50
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757332261279,
+          "hash": "ee15e626c36b8d97d01ef56ecdee28f7dc54eb289196a7034146cb6f232574d0"
+        },
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "12WdGvDA61veV1UrDfGsDDMLHss86v4xDL",
+              "amount": 5
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757332261278,
+          "hash": "58781a5e8bb829e1240a5cce1262f973899f377d411cd7d6b2ee93e25e5ae25a"
+        }
+      ],
+      "previousHash": "0000cc8830b0b6a5ae83b77eac40e0d652b81b6c6aedb830cf3f99d30181c265",
+      "difficulty": 4,
+      "nonce": 187666,
+      "merkleRoot": "1c07ac1a430295f854a3e8e855e24cec897e087d346abb114818cec0d180d0ac",
+      "hash": "000098bf2eda12f250967250cbbcdbe94990e5323d9192c8a8130efa37cad4e9"
+    },
+    {
+      "index": 4,
+      "timestamp": 1757332272821,
+      "transactions": [
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "1srdouhReJiCbCbpokH7bX3CFUVvwDvAo",
+              "amount": 50
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757332272821,
+          "hash": "85c0fb87e468a937c135bf6e4b5e55cbe3a6264474241fcaed36de6621c486d4"
+        },
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "1srdouhReJiCbCbpokH7bX3CFUVvwDvAo",
+              "amount": 5
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757332272820,
+          "hash": "ce0d2cf90cf257cc13bc7df087033ff230042bf125d09c529bbd9f8775e2b4c6"
+        }
+      ],
+      "previousHash": "000098bf2eda12f250967250cbbcdbe94990e5323d9192c8a8130efa37cad4e9",
+      "difficulty": 4,
+      "nonce": 74993,
+      "merkleRoot": "a40231e07d396f0420d3c59446584183dfbe953115e79679f16fbc6b9f0e33b4",
+      "hash": "00006f05fbd11098eb68518051349e3d520f743c0ba42ef75216520af0b9a60d"
+    },
+    {
+      "index": 5,
+      "timestamp": 1757334321557,
+      "transactions": [
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "1G9ztNr6ddQinu2EQBhndATYkVrz73xVLz",
+              "amount": 50
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757334321557,
+          "hash": "21978af15b88d026d597e59b5e0183b818cf65962b2387d7f621f58b1676b92e"
+        },
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "1G9ztNr6ddQinu2EQBhndATYkVrz73xVLz",
+              "amount": 5
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757334321553,
+          "hash": "cffe1bf74d0916a683259c1536c07ed9f14e107adaf9cbe0d6bdd9e1f288d174"
+        }
+      ],
+      "previousHash": "00006f05fbd11098eb68518051349e3d520f743c0ba42ef75216520af0b9a60d",
+      "difficulty": 4,
+      "nonce": 2402,
+      "merkleRoot": "89a4755ccc5b01f6eaa0c3a93811756f25264e81da75cc6fd1565a94b9092077",
+      "hash": "000090912cc29466c39fe4cb7aae30c0fb81bb32d4b0fb3f756de4dc9aaa5e7b"
+    },
+    {
+      "index": 6,
+      "timestamp": 1757334739462,
+      "transactions": [
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "1BXA5hBBJQyPMDQj4cSPqwCfP47hTwh8ho",
+              "amount": 50
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757334739462,
+          "hash": "acc7e35486cae6a4cd08794e906c60658e75a8f2106c715f6e600fad2a52e9dd"
+        },
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "1BXA5hBBJQyPMDQj4cSPqwCfP47hTwh8ho",
+              "amount": 5
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757334739460,
+          "hash": "d3e97273acf2d76762304dc59ddd9b2c11fae0661d371478c076af613d00661e"
+        }
+      ],
+      "previousHash": "000090912cc29466c39fe4cb7aae30c0fb81bb32d4b0fb3f756de4dc9aaa5e7b",
+      "difficulty": 4,
+      "nonce": 22366,
+      "merkleRoot": "bdc3cb6148d053862b82f3d855483213e59d37a23683272a45b83d6fa682c04b",
+      "hash": "0000545e0afdd751e679b7c9b0643f6962800ae109f89e93b597d0d90ae6555f"
+    },
+    {
+      "index": 7,
+      "timestamp": 1757334739606,
+      "transactions": [
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "15uWQf4EkWqqgwMKe5nct1CPdEyoHJbfho",
+              "amount": 50
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757334739606,
+          "hash": "18e2d37e9097575b723fd550d590572e5f811317fd378d2d180b48ae0354cb39"
+        },
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "15uWQf4EkWqqgwMKe5nct1CPdEyoHJbfho",
+              "amount": 5
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757334739605,
+          "hash": "2bdb597242454fe472b06aeab472eae137a90dee0a8d6a757a4da053cd94e70e"
+        }
+      ],
+      "previousHash": "0000545e0afdd751e679b7c9b0643f6962800ae109f89e93b597d0d90ae6555f",
+      "difficulty": 4,
+      "nonce": 4664,
+      "merkleRoot": "5409dd650404da74a58beaf426653574f14a07a52e905c239fdb4553c44e83dd",
+      "hash": "0000da9f1d76d829d91dce3a18e83ccb48f4bec09bda8984acb1770559b6546d"
+    },
+    {
+      "index": 8,
+      "timestamp": 1757334739716,
+      "transactions": [
+        {
+          "inputs": [
+            {
+              "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+              "outputIndex": -1
+            }
+          ],
+          "outputs": [
+            {
+              "address": "1BXA5hBBJQyPMDQj4cSPqwCfP47hTwh8ho",
+              "amount": 50
+            }
+          ],
+          "fee": 0,
+          "timestamp": 1757334739716,
+          "hash": "7cf7720c6aafdfac6990bfedd3d23e1f83dd129490be70d7eb7c5ad21e1977b7"
+        },
+        {
+          "inputs": [
+            {
+              "txHash": "acc7e35486cae6a4cd08794e906c60658e75a8f2106c715f6e600fad2a52e9dd",
+              "outputIndex": 0,
+              "signature": "3046022100b3ca9be67d671d2faf84d199cadfb5f346cbc73c9fb50c349a40789ed696ee70022100cbdea42ef14b7d8b0dc798ea87148599813e17d715873cd7e53b2be65045e406",
+              "publicKey": "04488c8e268eae9480e4e4a56e4bfae64930f8211e120f5d4b784467aab6cddc1db35eb844e6092be507dfcd53b4ff95dce2a968e119a9996d49656deb957b16d7"
+            }
+          ],
+          "outputs": [
+            {
+              "address": "15uWQf4EkWqqgwMKe5nct1CPdEyoHJbfho",
+              "amount": 5
+            },
+            {
+              "address": "1BXA5hBBJQyPMDQj4cSPqwCfP47hTwh8ho",
+              "amount": 44
+            }
+          ],
+          "fee": 1,
+          "timestamp": 1757334739682,
+          "hash": "90b545bdb713b92eab85b1539277a862da68fab9252c4b4ed3c9dac264c72733"
+        }
+      ],
+      "previousHash": "0000da9f1d76d829d91dce3a18e83ccb48f4bec09bda8984acb1770559b6546d",
+      "difficulty": 4,
+      "nonce": 29891,
+      "merkleRoot": "6e191b89d4b579b106ef5fe49a0290c7ce25e51d10403b2995934bc6efff0185",
+      "hash": "00005cb786ce83c92ac823ced12988d154cd7ba0b00b03ffe94821046975b17f"
+    }
+  ],
+  "difficulty": 4,
+  "miningReward": 50,
+  "consensusType": "POW",
+  "savedAt": 1757334739768
+}
